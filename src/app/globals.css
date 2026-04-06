@@ -1,0 +1,52 @@
+@import "tailwindcss";
+
+:root {
+  --background: #FDFCF0; /* Ivory */
+  --foreground: #4A154B; /* Deep Plum */
+  --primary: #4A154B;
+  --primary-foreground: #FDFCF0;
+  --secondary: #D8A7B1; /* Muted Rose */
+  --secondary-foreground: #4A154B;
+  --accent: #B8860B; /* Antique Gold */
+  --accent-foreground: #FDFCF0;
+  --muted: #FFF9F0; /* Soft Cream */
+  --muted-foreground: #6B4E71;
+  --card: #FFFFFF;
+  --card-foreground: #4A154B;
+  --border: #E5E5E5;
+  --input: #E5E5E5;
+  --ring: #D8A7B1;
+  --radius: 0.75rem;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --radius-xl: var(--radius);
+  
+  --font-serif: "Playfair Display", serif;
+  --font-sans: "Inter", sans-serif;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans);
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-serif);
+}

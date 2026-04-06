@@ -1,0 +1,73 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Category {
+  id          String    @id @default(cuid())
+  name        String    @unique // e.g., "Anniversary", "Birthday", "Albums"
+  slug        String    @unique
+  description String?
+  products    Product[]
+}
+
+model Product {
+  id              String           @id @default(cuid())
+  name            String
+  slug            String           @unique
+  description     String
+  basePrice       Int              // in INR
+  images          String[]         // array of image URLs
+  category        Category         @relation(fields: [categoryId], references: [id])
+  categoryId      String
+  variants        Json?            // for sizes, formats, layouts
+  specifications  Json?            // what's included, etc.
+  orderItems      OrderItem[]
+}
+
+model Order {
+  id              String           @id @default(cuid())
+  createdAt       DateTime         @default(now())
+  customerName    String
+  customerEmail   String
+  customerPhone   String
+  shippingAddress String
+  pincode         String
+  totalAmount     Int
+  paymentStatus   String           @default("pending") // pending, paid, failed
+  shippingStatus  String           @default("confirmed") // confirmed (Indian addresses)
+  razorpayOrderId String?          @unique
+  items           OrderItem[]
+}
+
+model OrderItem {
+  id                 String          @id @default(cuid())
+  order              Order           @relation(fields: [orderId], references: [id])
+  orderId            String
+  product            Product         @relation(fields: [productId], references: [id])
+  productId          String
+  quantity           Int             @default(1)
+  price              Int
+  personalization    Personalization? @relation(fields: [personalizationId], references: [id])
+  personalizationId  String?         @unique
+}
+
+model Personalization {
+  id               String    @id @default(cuid())
+  recipientName    String
+  senderName       String
+  occasionType     String
+  customMessage    String?
+  photoUrls        String[]
+  storyInputs      Json?
+  orderItem        OrderItem?
+}
+
+model Admin {
+  id       String @id @default(cuid())
+  email    String @unique
+  password String
+}
