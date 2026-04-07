@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { SizePreset } from "@/lib/products";
 import {
+  ChevronDown,
   ChevronLeft,
   ChevronRight,
   Image as ImageIcon,
@@ -13,6 +14,7 @@ import {
   Redo2,
   Save,
   ShoppingCart,
+  Sparkles,
   Trash2,
   Type,
   Undo2,
@@ -97,8 +99,8 @@ export interface PhotoEditorProps {
   onUpdate: (photos: string[], layoutData: unknown) => void;
 }
 
-const PAGE_BACKGROUND = "#fbf5e8";
-const PAGE_SAFE_BORDER = "#f8b5ff";
+const PAGE_BACKGROUND = "#FFFDF5";
+const PAGE_SAFE_BORDER = "#D4AF37";
 
 const FONT_MAP: Record<FontOption, string> = {
   classic: "'Times New Roman', serif",
@@ -113,52 +115,67 @@ const LAYOUTS: LayoutPreset[] = [
     slots: [
       {
         id: "a",
-        x: 30,
-        y: 28,
+        x: 31,
+        y: 31,
         w: 38,
         h: 38,
       },
     ],
   },
   {
-    id: "single-caption",
+    id: "single",
     label: "Single Photo",
+    slots: [
+      { id: "a", x: 15, y: 15, w: 70, h: 70 },
+    ],
+  },
+  {
+    id: "single-caption",
+    label: "Single Photo + Caption",
     slots: [
       {
         id: "a",
         x: 18,
-        y: 16,
+        y: 12.5,
         w: 64,
         h: 64,
         captionX: 18,
-        captionY: 82,
+        captionY: 78.5,
         captionW: 64,
         captionH: 9,
       },
     ],
   },
   {
-    id: "two-side-caption",
+    id: "two-side",
     label: "Two Side",
+    slots: [
+      { id: "a", x: 12, y: 18, w: 35, h: 64 },
+      { id: "b", x: 53, y: 18, w: 35, h: 64 },
+    ],
+  },
+  {
+    id: "two-side-caption",
+    label: "Two Side + Caption",
     slots: [
       {
         id: "a",
-        x: 9,
+        x: 13.5,
         y: 18,
         w: 33,
         h: 54,
-        captionX: 9,
+        captionX: 13.5,
         captionY: 74,
         captionW: 33,
         captionH: 8,
       },
       {
         id: "b",
-        x: 49,
+        x: 53.5,
         y: 18,
         w: 33,
         h: 54,
-        captionX: 49,
+        captionX: 53.5,
         captionY: 74,
         captionW: 33,
         captionH: 8,
@@ -166,17 +183,24 @@ const LAYOUTS: LayoutPreset[] = [
     ],
   },
   {
-    id: "portrait-right-caption",
+    id: "portrait",
     label: "Portrait",
+    slots: [
+      { id: "a", x: 20, y: 10, w: 60, h: 80 },
+    ],
+  },
+  {
+    id: "portrait-right-caption",
+    label: "Portrait + Caption",
     slots: [
       {
         id: "a",
-        x: 14,
-        y: 14,
+        x: 22,
+        y: 11,
         w: 56,
         h: 68,
-        captionX: 14,
-        captionY: 84,
+        captionX: 22,
+        captionY: 81,
         captionW: 56,
         captionH: 8,
       },
@@ -186,42 +210,57 @@ const LAYOUTS: LayoutPreset[] = [
     id: "two-tall",
     label: "Two Tall",
     slots: [
+      { id: "a", x: 10, y: 10, w: 38, h: 80 },
+      { id: "b", x: 52, y: 10, w: 38, h: 80 },
+    ],
+  },
+  {
+    id: "two-tall-caption",
+    label: "Two Tall + Caption",
+    slots: [
       {
         id: "a",
-        x: 8,
-        y: 14,
+        x: 11,
+        y: 10.5,
         w: 35,
         h: 70,
-        captionX: 8,
-        captionY: 86,
+        captionX: 11,
+        captionY: 82.5,
         captionW: 35,
         captionH: 7,
       },
       {
         id: "b",
-        x: 47,
-        y: 14,
+        x: 54,
+        y: 10.5,
         w: 35,
         h: 70,
-        captionX: 47,
-        captionY: 86,
+        captionX: 54,
+        captionY: 82.5,
         captionW: 35,
         captionH: 7,
       },
     ],
   },
   {
-    id: "wide-caption",
+    id: "wide",
     label: "Wide",
+    slots: [
+      { id: "a", x: 10, y: 20, w: 80, h: 60 },
+    ],
+  },
+  {
+    id: "wide-caption",
+    label: "Wide + Caption",
     slots: [
       {
         id: "a",
-        x: 8,
-        y: 22,
+        x: 13,
+        y: 18.5,
         w: 74,
         h: 52,
-        captionX: 8,
-        captionY: 77,
+        captionX: 13,
+        captionY: 72.5,
         captionW: 74,
         captionH: 9,
       },
@@ -231,49 +270,115 @@ const LAYOUTS: LayoutPreset[] = [
     id: "four-grid",
     label: "Four Grid",
     slots: [
-      { id: "a", x: 5, y: 13, w: 36, h: 33 },
-      { id: "b", x: 45, y: 13, w: 36, h: 33 },
-      { id: "c", x: 5, y: 50, w: 36, h: 33 },
-      { id: "d", x: 45, y: 50, w: 36, h: 33 },
+      { id: "a", x: 10.5, y: 15, w: 36, h: 33 },
+      { id: "b", x: 53.5, y: 15, w: 36, h: 33 },
+      { id: "c", x: 10.5, y: 52, w: 36, h: 33 },
+      { id: "d", x: 53.5, y: 52, w: 36, h: 33 },
+    ],
+  },
+  {
+    id: "four-grid-caption",
+    label: "Four Grid + Caption",
+    slots: [
+      {
+        id: "a",
+        x: 11,
+        y: 11,
+        w: 35,
+        h: 27,
+        captionX: 11,
+        captionY: 40,
+        captionW: 35,
+        captionH: 6,
+      },
+      {
+        id: "b",
+        x: 54,
+        y: 11,
+        w: 35,
+        h: 27,
+        captionX: 54,
+        captionY: 40,
+        captionW: 35,
+        captionH: 6,
+      },
+      {
+        id: "c",
+        x: 11,
+        y: 53.5,
+        w: 35,
+        h: 27,
+        captionX: 11,
+        captionY: 82.5,
+        captionW: 35,
+        captionH: 6,
+      },
+      {
+        id: "d",
+        x: 54,
+        y: 53.5,
+        w: 35,
+        h: 27,
+        captionX: 54,
+        captionY: 82.5,
+        captionW: 35,
+        captionH: 6,
+      },
     ],
   },
   {
     id: "three-mix",
     label: "Mixed",
     slots: [
+      { id: "a", x: 15, y: 15, w: 33, h: 33 },
+      { id: "b", x: 52, y: 15, w: 33, h: 33 },
+      { id: "c", x: 15, y: 52, w: 70, h: 33 },
+    ],
+  },
+  {
+    id: "three-mix-caption",
+    label: "Mixed + Caption",
+    slots: [
       {
         id: "a",
-        x: 8,
-        y: 15,
+        x: 15.5,
+        y: 13,
         w: 31,
         h: 28,
-        captionX: 8,
-        captionY: 45,
+        captionX: 15.5,
+        captionY: 43,
         captionW: 31,
         captionH: 7,
       },
       {
         id: "b",
-        x: 43,
-        y: 15,
+        x: 53.5,
+        y: 13,
         w: 31,
         h: 28,
-        captionX: 43,
-        captionY: 45,
+        captionX: 53.5,
+        captionY: 43,
         captionW: 31,
         captionH: 7,
       },
       {
         id: "c",
-        x: 8,
-        y: 55,
+        x: 17,
+        y: 53,
         w: 66,
         h: 24,
-        captionX: 8,
-        captionY: 81,
+        captionX: 17,
+        captionY: 79,
         captionW: 66,
         captionH: 8,
       },
+    ],
+  },
+  {
+    id: "square",
+    label: "Square",
+    slots: [
+      { id: "a", x: 21, y: 21, w: 58, h: 58 },
     ],
   },
   {
@@ -282,79 +387,96 @@ const LAYOUTS: LayoutPreset[] = [
     slots: [
       {
         id: "a",
-        x: 18,
-        y: 13,
+        x: 24,
+        y: 13.5,
         w: 52,
         h: 52,
-        captionX: 18,
-        captionY: 68,
+        captionX: 24,
+        captionY: 67.5,
         captionW: 52,
         captionH: 8,
       },
     ],
   },
   {
-    id: "two-stacked-caption",
+    id: "two-stacked",
     label: "Two Stacked",
+    slots: [
+      { id: "a", x: 18, y: 12, w: 64, h: 36 },
+      { id: "b", x: 18, y: 52, w: 64, h: 36 },
+    ],
+  },
+  {
+    id: "two-stacked-caption",
+    label: "Two Stacked + Caption",
     slots: [
       {
         id: "a",
-        x: 16,
-        y: 12,
+        x: 20,
+        y: 8,
         w: 60,
         h: 28,
-        captionX: 16,
-        captionY: 42,
+        captionX: 20,
+        captionY: 38,
         captionW: 60,
         captionH: 7,
       },
       {
         id: "b",
-        x: 16,
-        y: 54,
+        x: 20,
+        y: 57,
         w: 60,
         h: 28,
-        captionX: 16,
-        captionY: 84,
+        captionX: 20,
+        captionY: 87,
         captionW: 60,
         captionH: 7,
       },
     ],
   },
   {
-    id: "three-columns-caption",
+    id: "three-columns",
     label: "Three Columns",
+    slots: [
+      { id: "a", x: 8, y: 15, w: 26, h: 70 },
+      { id: "b", x: 37, y: 15, w: 26, h: 70 },
+      { id: "c", x: 66, y: 15, w: 26, h: 70 },
+    ],
+  },
+  {
+    id: "three-columns-caption",
+    label: "Three Columns + Caption",
     slots: [
       {
         id: "a",
-        x: 6,
-        y: 16,
+        x: 9,
+        y: 18.5,
         w: 23,
         h: 54,
-        captionX: 6,
-        captionY: 72,
+        captionX: 9,
+        captionY: 74.5,
         captionW: 23,
         captionH: 7,
       },
       {
         id: "b",
-        x: 31,
-        y: 16,
+        x: 38.5,
+        y: 18.5,
         w: 23,
         h: 54,
-        captionX: 31,
-        captionY: 72,
+        captionX: 38.5,
+        captionY: 74.5,
         captionW: 23,
         captionH: 7,
       },
       {
         id: "c",
-        x: 56,
-        y: 16,
+        x: 68,
+        y: 18.5,
         w: 23,
         h: 54,
-        captionX: 56,
-        captionY: 72,
+        captionX: 68,
+        captionY: 74.5,
         captionW: 23,
         captionH: 7,
       },
@@ -364,36 +486,45 @@ const LAYOUTS: LayoutPreset[] = [
     id: "hero-two-small",
     label: "Hero + Two",
     slots: [
+      { id: "a", x: 10, y: 12, w: 80, h: 36 },
+      { id: "b", x: 10, y: 52, w: 38, h: 36 },
+      { id: "c", x: 52, y: 52, w: 38, h: 36 },
+    ],
+  },
+  {
+    id: "hero-two-small-caption",
+    label: "Hero + Two + Caption",
+    slots: [
       {
         id: "a",
-        x: 8,
-        y: 12,
+        x: 13,
+        y: 8.5,
         w: 74,
         h: 34,
-        captionX: 8,
-        captionY: 48,
+        captionX: 13,
+        captionY: 44.5,
         captionW: 74,
         captionH: 7,
       },
       {
         id: "b",
-        x: 8,
-        y: 58,
+        x: 13,
+        y: 56.5,
         w: 35,
         h: 23,
-        captionX: 8,
-        captionY: 83,
+        captionX: 13,
+        captionY: 81.5,
         captionW: 35,
         captionH: 7,
       },
       {
         id: "c",
-        x: 47,
-        y: 58,
+        x: 52,
+        y: 56.5,
         w: 35,
         h: 23,
-        captionX: 47,
-        captionY: 83,
+        captionX: 52,
+        captionY: 81.5,
         captionW: 35,
         captionH: 7,
       },
@@ -403,37 +534,46 @@ const LAYOUTS: LayoutPreset[] = [
     id: "left-hero-right-stack",
     label: "Hero + Stack",
     slots: [
+      { id: "a", x: 8, y: 10, w: 44, h: 80 },
+      { id: "b", x: 60, y: 10, w: 32, h: 39 },
+      { id: "c", x: 60, y: 51, w: 32, h: 39 },
+    ],
+  },
+  {
+    id: "left-hero-right-stack-caption",
+    label: "Hero + Stack + Caption",
+    slots: [
       {
         id: "a",
         x: 8,
-        y: 12,
-        w: 43,
-        h: 66,
+        y: 10,
+        w: 44,
+        h: 71,
         captionX: 8,
-        captionY: 80,
-        captionW: 43,
+        captionY: 83,
+        captionW: 44,
         captionH: 7,
       },
       {
         id: "b",
-        x: 55,
-        y: 12,
-        w: 27,
+        x: 60,
+        y: 10,
+        w: 32,
         h: 31,
-        captionX: 55,
-        captionY: 45,
-        captionW: 27,
+        captionX: 60,
+        captionY: 43,
+        captionW: 32,
         captionH: 6,
       },
       {
         id: "c",
-        x: 55,
-        y: 52,
-        w: 27,
+        x: 60,
+        y: 51,
+        w: 32,
         h: 31,
-        captionX: 55,
-        captionY: 85,
-        captionW: 27,
+        captionX: 60,
+        captionY: 84,
+        captionW: 32,
         captionH: 6,
       },
     ],
@@ -442,36 +582,45 @@ const LAYOUTS: LayoutPreset[] = [
     id: "top-two-bottom-wide",
     label: "Two + Wide",
     slots: [
+      { id: "a", x: 10, y: 15, w: 38, h: 30 },
+      { id: "b", x: 52, y: 15, w: 38, h: 30 },
+      { id: "c", x: 10, y: 50, w: 80, h: 35 },
+    ],
+  },
+  {
+    id: "top-two-bottom-wide-caption",
+    label: "Two + Wide + Caption",
+    slots: [
       {
         id: "a",
-        x: 8,
-        y: 12,
+        x: 11,
+        y: 13.5,
         w: 35,
         h: 24,
-        captionX: 8,
-        captionY: 38,
+        captionX: 11,
+        captionY: 39.5,
         captionW: 35,
         captionH: 6,
       },
       {
         id: "b",
-        x: 47,
-        y: 12,
+        x: 54,
+        y: 13.5,
         w: 35,
         h: 24,
-        captionX: 47,
-        captionY: 38,
+        captionX: 54,
+        captionY: 39.5,
         captionW: 35,
         captionH: 6,
       },
       {
         id: "c",
-        x: 8,
-        y: 50,
+        x: 13,
+        y: 54,
         w: 74,
         h: 28,
-        captionX: 8,
-        captionY: 80,
+        captionX: 13,
+        captionY: 84,
         captionW: 74,
         captionH: 7,
       },
@@ -481,66 +630,27 @@ const LAYOUTS: LayoutPreset[] = [
     id: "mosaic-five",
     label: "Mosaic",
     slots: [
-      { id: "a", x: 8, y: 12, w: 40, h: 31 },
-      { id: "b", x: 52, y: 12, w: 30, h: 20 },
-      { id: "c", x: 52, y: 35, w: 30, h: 20 },
-      { id: "d", x: 8, y: 48, w: 24, h: 28 },
-      { id: "e", x: 35, y: 48, w: 47, h: 28 },
+      { id: "a", x: 13, y: 15, w: 40, h: 31 },
+      { id: "b", x: 57, y: 15, w: 30, h: 20 },
+      { id: "c", x: 57, y: 38, w: 30, h: 20 },
+      { id: "d", x: 13, y: 51, w: 24, h: 28 },
+      { id: "e", x: 40, y: 51, w: 47, h: 28 },
     ],
   },
   {
-    id: "four-grid-caption",
-    label: "Grid + Caption",
+    id: "mosaic-five-caption",
+    label: "Mosaic + Caption",
     slots: [
-      {
-        id: "a",
-        x: 8,
-        y: 10,
-        w: 35,
-        h: 27,
-        captionX: 8,
-        captionY: 39,
-        captionW: 35,
-        captionH: 6,
-      },
-      {
-        id: "b",
-        x: 47,
-        y: 10,
-        w: 35,
-        h: 27,
-        captionX: 47,
-        captionY: 39,
-        captionW: 35,
-        captionH: 6,
-      },
-      {
-        id: "c",
-        x: 8,
-        y: 50,
-        w: 35,
-        h: 27,
-        captionX: 8,
-        captionY: 79,
-        captionW: 35,
-        captionH: 6,
-      },
-      {
-        id: "d",
-        x: 47,
-        y: 50,
-        w: 35,
-        h: 27,
-        captionX: 47,
-        captionY: 79,
-        captionW: 35,
-        captionH: 6,
-      },
+      { id: "a", x: 13, y: 12, w: 40, h: 28, captionX: 13, captionY: 41, captionW: 40, captionH: 6 },
+      { id: "b", x: 57, y: 12, w: 30, h: 18, captionX: 57, captionY: 31, captionW: 30, captionH: 5 },
+      { id: "c", x: 57, y: 40, w: 30, h: 18, captionX: 57, captionY: 59, captionW: 30, captionH: 5 },
+      { id: "d", x: 13, y: 51, w: 24, h: 26, captionX: 13, captionY: 78, captionW: 24, captionH: 6 },
+      { id: "e", x: 40, y: 51, w: 47, h: 26, captionX: 40, captionY: 78, captionW: 47, captionH: 6 },
     ],
   },
   {
     id: "blank-text",
-    label: "Text",
+    label: "Text Only",
     slots: [],
   },
 ];
@@ -594,8 +704,9 @@ function createInitialPages() {
   ];
 }
 
-function getEditorMetrics(sizePreset: SizePreset, visiblePageCount: number) {
-  const pageHeight = Math.round((visiblePageCount === 1 ? 520 : 360) * sizePreset.editorScale);
+function getEditorMetrics(sizePreset: SizePreset, visiblePageCount: number, isMobile: boolean = false) {
+  const baseHeight = isMobile ? 320 : 400; // Consistent height regardless of page count
+  const pageHeight = Math.round(baseHeight * sizePreset.editorScale);
   const pageWidth = Math.round(pageHeight * sizePreset.pageAspectRatio);
   const thumbnailHeight = Math.max(48, Math.round(58 * sizePreset.editorScale));
   const thumbnailWidth = Math.round(thumbnailHeight * sizePreset.pageAspectRatio);
@@ -608,7 +719,15 @@ function getEditorMetrics(sizePreset: SizePreset, visiblePageCount: number) {
   };
 }
 
-function buildViewRanges(pages: PageData[]) {
+function buildViewRanges(pages: PageData[], isMobile: boolean = false) {
+  if (isMobile) {
+    return pages.map((page, index) => ({
+      id: page.id,
+      label: page.label,
+      pageIndices: [index],
+    }));
+  }
+
   if (pages.length < 3) {
     return [{ id: "covers", label: "Covers", pageIndices: [0, 1] }];
   }
@@ -705,32 +824,40 @@ function PageCanvas({
   const layout = LAYOUTS.find((item) => item.id === page.layoutId) ?? LAYOUTS[0];
   const isLandscape = sizePreset.pageAspectRatio > 1.05;
 
-  if (page.kind === "back-cover") {
-    return (
-      <div className="relative h-full w-full overflow-hidden bg-[#f8f1df]">
-        <div className="absolute left-[4%] top-[4%] h-[92%] w-[92%] border border-[rgba(248,181,255,0.9)]" />
-        <div className="absolute bottom-[10%] left-1/2 -translate-x-1/2 text-center">
-          <p className="font-serif text-[16px] font-semibold italic text-[#405142]">Kahaani</p>
+  const renderCovers = () => {
+    if (page.kind === "back-cover") {
+      return (
+        <div className="absolute inset-0 overflow-hidden bg-[#FFFDF5]">
+          <div className="absolute left-[4%] top-[4%] h-[92%] w-[92%] border border-[rgba(212,175,55,0.3)]" />
+          <div className="absolute bottom-[10%] left-1/2 -translate-x-1/2 text-center">
+            <p className="font-serif text-[16px] font-semibold italic text-[#8B0000]">Kahaani</p>
+          </div>
         </div>
-      </div>
-    );
-  }
-
-  return (
-    <div className="relative h-full w-full overflow-hidden bg-[#fbf5e8]">
-      <div className="absolute left-[4%] top-[4%] h-[92%] w-[92%] border border-[rgba(248,181,255,0.9)]" />
-      <div className="absolute left-[4.8%] top-[4.4%] text-[8px] font-semibold lowercase tracking-wide text-[#ff66ff]">safe-area</div>
-
-      {page.kind === "front-cover" ? (
-        <>
-          <div className={`absolute left-[49%] top-[16%] -translate-x-1/2 text-center font-serif leading-[0.92] text-[#355543] ${isLandscape ? "max-w-[46%] text-[38px]" : "max-w-[34%] text-[50px]"}`}>
+      );
+    }
+    if (page.kind === "front-cover") {
+      return (
+        <div className="absolute inset-0 overflow-hidden bg-[#FFFDF5]">
+          <div className="absolute left-[4%] top-[4%] h-[92%] w-[92%] border border-[rgba(212,175,55,0.3)]" />
+          <div className="absolute left-[4.8%] top-[4.4%] text-[8px] font-semibold lowercase tracking-wide text-[#D4AF37]">safe-area</div>
+          <div className={`absolute left-[49%] top-[16%] -translate-x-1/2 text-center font-serif leading-[0.92] text-[#8B0000] ${isLandscape ? "max-w-[46%] text-[38px]" : "max-w-[34%] text-[50px]"}`}>
             {coverTitle}
           </div>
-          <div className={`absolute bottom-[18%] left-[49%] -translate-x-1/2 font-semibold uppercase tracking-[0.28em] text-[#5d6a56] ${isLandscape ? "text-[9px]" : "text-[11px]"}`}>
+          <div className={`absolute bottom-[18%] left-[49%] -translate-x-1/2 font-semibold uppercase tracking-[0.28em] text-[#D4AF37] ${isLandscape ? "text-[9px]" : "text-[11px]"}`}>
             thank you for everything
           </div>
-        </>
-      ) : null}
+        </div>
+      );
+    }
+    return <div className="absolute inset-0 bg-[#FFFDF5]">
+      <div className="absolute left-[4%] top-[4%] h-[92%] w-[92%] border border-[rgba(212,175,55,0.3)]" />
+      <div className="absolute left-[4.8%] top-[4.4%] text-[8px] font-semibold lowercase tracking-wide text-[#D4AF37]">safe-area</div>
+    </div>;
+  };
+
+  return (
+    <div className="relative h-full w-full">
+      {renderCovers()}
 
       {layout.slots.map((slot) => {
         const content = page.slots[slot.id];
@@ -774,7 +901,7 @@ function PageCanvas({
             {slot.captionW ? (
               <button
                 type="button"
-                className={`absolute overflow-hidden border border-dashed bg-white/40 text-left ${captionSelected ? "border-[#8d8d8d]" : "border-[#dddddd]"}`}
+                className={`absolute overflow-hidden border-2 border-dashed bg-white/60 text-left transition-all ${captionSelected ? "border-primary shadow-lg scale-[1.02] z-30" : "border-foreground/10 hover:border-primary/40"}`}
                 style={{
                   left: `${slot.captionX}%`,
                   top: `${slot.captionY}%`,
@@ -788,7 +915,7 @@ function PageCanvas({
                   onSelectCaption(slot.id);
                 }}
               >
-                <span className="block truncate px-1 pt-[2px] text-[8px] leading-none text-[#303030]">{content.caption}</span>
+                <span className="block px-2 py-1 text-[10px] font-medium leading-tight text-foreground/80">{content.caption || "Click to add text..."}</span>
               </button>
             ) : null}
           </div>
@@ -816,12 +943,21 @@ export default function PhotoEditor({
   const [undoStack, setUndoStack] = useState<EditorSnapshot[]>([]);
   const [redoStack, setRedoStack] = useState<EditorSnapshot[]>([]);
   const [zoom, setZoom] = useState(1);
+  const [activeMobilePanel, setActiveMobilePanel] = useState<"none" | "library" | "layouts" | "text" | "backgrounds">("none");
   const [libraryColumns, setLibraryColumns] = useState<2 | 3>(2);
   const [cropDrag, setCropDrag] = useState<CropDragState | null>(null);
   const slotDragBounds = useRef<Record<string, DOMRect>>({});
+  const [isMobile, setIsMobile] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const views = useMemo(() => buildViewRanges(pages), [pages]);
+  useEffect(() => {
+    const check = () => setIsMobile(window.innerWidth < 768);
+    check();
+    window.addEventListener("resize", check);
+    return () => window.removeEventListener("resize", check);
+  }, []);
+
+  const views = useMemo(() => buildViewRanges(pages, isMobile), [pages, isMobile]);
 
   useEffect(() => {
     const firstEditablePage = pages[2] ?? pages[1] ?? pages[0];
@@ -831,6 +967,7 @@ export default function PhotoEditor({
   }, [pages, selectedPageId]);
 
   useEffect(() => {
+    // Only sync if actual content has changed (simple check)
     onUpdate(uploadedPhotos, { pages, currentView, selectedPageId, selectedTarget });
   }, [uploadedPhotos, pages, currentView, selectedPageId, selectedTarget, onUpdate]);
 
@@ -1102,40 +1239,40 @@ export default function PhotoEditor({
 
   const view = views[currentView] ?? views[1] ?? views[0];
   const visiblePages = view.pageIndices.map((index) => pages[index]).filter(Boolean);
-  const editorMetrics = getEditorMetrics(sizePreset, visiblePages.length);
+  const editorMetrics = getEditorMetrics(sizePreset, visiblePages.length, isMobile);
 
   return (
-    <div className="flex h-full min-h-0 flex-col overflow-hidden bg-[#f3f1ee]">
-      <div className="flex h-16 items-center justify-between border-b border-[#e8e4de] bg-white px-6">
-        <div className="min-w-[160px] text-[20px] font-semibold italic text-[#111]">Kahaani</div>
+    <div className="flex h-full min-h-0 flex-col overflow-hidden bg-secondary/20">
+      <div className="flex h-20 items-center justify-between border-b border-border/50 bg-white px-8">
+        <div className="min-w-[160px] text-[24px] font-black uppercase tracking-tighter text-foreground">Kahaani</div>
         <div className="text-center">
-          <p className="text-[15px] font-semibold text-[#2d2d2d]">{projectName}</p>
+          <p className="text-xs font-black uppercase tracking-[0.2em] text-foreground/40">{projectName}</p>
         </div>
-        <div className="flex min-w-[250px] items-center justify-end gap-4">
-          <div className="hidden items-center gap-3 text-[14px] text-[#4a4a4a] md:flex">
-            <span className="text-[10px]">●</span>
-            <span>My Project</span>
+        <div className="flex min-w-[250px] items-center justify-end gap-6">
+          <div className="hidden items-center gap-4 text-[10px] font-black uppercase tracking-widest text-foreground/30 md:flex">
+            <span className="text-primary animate-pulse">●</span>
+            <span>Cloud Saved</span>
             <Save className="h-4 w-4" />
-            <Play className="h-4 w-4" />
           </div>
           <button
             type="button"
             onClick={onContinue}
-            className="inline-flex h-10 items-center gap-2 rounded-[8px] bg-black px-4 text-[13px] font-semibold text-white"
+            className="inline-flex h-12 items-center gap-3 rounded-full bg-primary-pressed px-8 text-[11px] font-black uppercase tracking-[0.2em] text-white shadow-xl shadow-primary-pressed/20 transition-all hover:scale-105 active:scale-95"
           >
             <ShoppingCart className="h-4 w-4" />
-            Save / Continue
+            Checkout
             <ChevronRight className="h-4 w-4" />
           </button>
-          <button type="button" onClick={onBack} className="text-[#555]">
-            <X className="h-5 w-5" />
+          <button type="button" onClick={onBack} className="text-foreground/40 hover:text-primary transition-colors">
+            <X className="h-6 w-6" />
           </button>
         </div>
       </div>
 
-      <div className="grid min-h-0 flex-1 grid-cols-[232px_minmax(0,1fr)_48px_220px]">
+      <div className="relative flex min-h-0 flex-1 flex-col md:grid md:grid-cols-[280px_1fr_300px]">
+        {/* Left Sidebar - Library */}
         <aside
-          className="flex min-h-0 flex-col border-r border-[#e2ded7] bg-white"
+          className={`absolute inset-y-0 left-0 z-50 w-[280px] border-r border-border/50 bg-white shadow-2xl transition-transform duration-300 md:relative md:z-0 md:w-full md:translate-x-0 md:shadow-none ${activeMobilePanel === "library" ? "translate-x-0" : "-translate-x-full"}`}
           onDragOver={(event) => event.preventDefault()}
           onDrop={(event) => {
             event.preventDefault();
@@ -1144,41 +1281,46 @@ export default function PhotoEditor({
             }
           }}
         >
-          <div className="border-b border-[#ece7df] px-5 py-4 text-center text-[13px] font-semibold text-[#4c4c4c]">Upload</div>
-          <div className="min-h-0 flex-1 overflow-y-auto px-4 py-4">
+          <div className="flex items-center justify-between border-b border-border/50 px-5 py-6">
+            <div className="text-[10px] font-black uppercase tracking-[0.3em] text-foreground/30">Library</div>
+            <button type="button" onClick={() => setActiveMobilePanel("none")} className="p-2 text-foreground/30 md:hidden">
+              <X className="h-4 w-4" />
+            </button>
+          </div>
+          <div className="min-h-0 flex-1 overflow-y-auto px-6 py-6 scrollbar-hide">
             {uploadedPhotos.length === 0 ? (
-              <div className="flex h-full min-h-[580px] flex-col items-center justify-center rounded-none border border-dashed border-[#cfd5dc] px-5 text-center">
-                <Upload className="mb-6 h-10 w-10 text-[#c0c5ca]" />
-                <p className="max-w-[160px] text-[14px] leading-7 text-[#989898]">Drag and drop images or upload from your computer.</p>
+              <div className="flex h-full min-h-[400px] flex-col items-center justify-center rounded-[2rem] border-2 border-dashed border-border/50 px-8 text-center bg-secondary/10">
+                <Upload className="mb-8 h-12 w-12 text-primary/30" />
+                <p className="max-w-[170px] text-[11px] font-bold uppercase tracking-widest leading-loose text-foreground/30">Drag your memories here to start</p>
                 <button
                   type="button"
                   onClick={() => fileInputRef.current?.click()}
-                  className="mt-6 inline-flex h-10 items-center justify-center rounded-[8px] bg-[#888] px-6 text-[13px] font-semibold text-white"
+                  className="mt-10 inline-flex h-14 items-center justify-center rounded-full bg-primary-pressed px-10 text-[11px] font-black uppercase tracking-[0.2em] text-white shadow-xl shadow-primary-pressed/20 transition-all hover:scale-105 active:scale-95"
                 >
-                  Upload images
+                  Upload photos
                 </button>
               </div>
             ) : (
-              <div className="flex flex-col gap-4">
-                <div className="flex items-center justify-between text-[12px] text-[#707070]">
-                  <button type="button" onClick={autofillPages} className="flex items-center gap-1 font-medium">
-                    <span className="text-[14px]">✎</span>
+              <div className="flex flex-col gap-6">
+                <div className="flex items-center justify-between text-[10px] font-black uppercase tracking-widest text-foreground/40">
+                  <button type="button" onClick={autofillPages} className="flex items-center gap-2 hover:text-primary transition-colors">
+                    <Sparkles className="h-3 w-3" />
                     Autofill
                   </button>
-                  <div className="flex items-center gap-1">
+                  <div className="flex items-center gap-2">
                     {[2, 3].map((columns) => (
                       <button
                         key={columns}
                         type="button"
                         onClick={() => setLibraryColumns(columns as 2 | 3)}
-                        className={`flex h-6 w-6 items-center justify-center rounded ${libraryColumns === columns ? "bg-[#1e1e1e] text-white" : "bg-[#efefef] text-[#6f6f6f]"}`}
+                        className={`flex h-7 w-7 items-center justify-center rounded-lg transition-all ${libraryColumns === columns ? "bg-primary text-white shadow-lg shadow-primary/20" : "bg-secondary/30 text-foreground/40 hover:bg-secondary/50"}`}
                       >
                         {columns === 2 ? "◫" : "▦"}
                       </button>
                     ))}
                   </div>
                 </div>
-                <div className={`grid gap-3 ${libraryColumns === 2 ? "grid-cols-2" : "grid-cols-3"}`}>
+                <div className={`grid gap-4 ${libraryColumns === 2 ? "grid-cols-2" : "grid-cols-3"}`}>
                   {uploadedPhotos.map((photo, index) => (
                     <button
                       key={`${photo}-${index}`}
@@ -1187,23 +1329,26 @@ export default function PhotoEditor({
                       onDragStart={(event) => {
                         event.dataTransfer.setData("photo-url", photo);
                       }}
-                      onClick={() => placePhoto(photo)}
-                      className="group text-left"
+                      onClick={() => {
+                        placePhoto(photo);
+                        if (window.innerWidth < 768) setActiveMobilePanel("none");
+                      }}
+                      className="group relative"
                     >
-                      <div className="aspect-[0.96] overflow-hidden rounded-[4px] border border-[#e0e0e0] bg-[#f5f5f5]">
-                        <img src={photo} alt="" className="h-full w-full object-cover" />
+                      <div className="aspect-square overflow-hidden rounded-[1rem] border-2 border-border/20 bg-secondary/10 transition-all group-hover:scale-105 group-hover:border-primary group-hover:shadow-xl shadow-primary/10">
+                        <img src={photo} alt="" className="h-full w-full object-cover p-1 rounded-[0.8rem]" />
                       </div>
-                      <p className="mt-1 truncate text-[10px] text-[#7c7c7c]">Photo {index + 1}</p>
+                      <div className="absolute top-2 right-2 h-4 w-4 bg-primary rounded-full scale-0 group-hover:scale-100 transition-transform flex items-center justify-center text-[8px] text-white font-black">+</div>
                     </button>
                   ))}
                 </div>
                 <button
                   type="button"
                   onClick={() => fileInputRef.current?.click()}
-                  className="mt-4 inline-flex h-10 items-center justify-center gap-2 rounded-[8px] bg-[#888] px-5 text-[13px] font-semibold text-white"
+                  className="mt-8 inline-flex h-14 items-center justify-center gap-3 rounded-full bg-secondary/30 px-6 text-[11px] font-black uppercase tracking-[0.2em] text-foreground hover:bg-secondary/50 transition-all"
                 >
                   <Plus className="h-4 w-4" />
-                  Upload images
+                   Add more
                 </button>
               </div>
             )}
@@ -1223,11 +1368,12 @@ export default function PhotoEditor({
           </div>
         </aside>
 
-        <section className="flex min-h-0 flex-col">
-          <div className="flex items-center justify-between px-5 py-3">
-            <div className="flex items-center gap-4 text-[#9c9c9c]">
+        <section className="relative flex min-h-0 flex-1 flex-col">
+          <div className="flex items-center justify-between px-5 py-3 md:py-3">
+            <div className="flex items-center gap-4 text-[#9c9c9c] md:gap-6">
               <button
                 type="button"
+                className="flex h-10 w-10 items-center justify-center rounded-full bg-secondary/10 hover:bg-secondary/20 transition-all active:scale-90"
                 onClick={() => {
                   const previous = undoStack[undoStack.length - 1];
                   if (!previous) return;
@@ -1236,10 +1382,11 @@ export default function PhotoEditor({
                   restoreSnapshot(previous);
                 }}
               >
-                <Undo2 className="h-5 w-5" />
+                <Undo2 className="h-4 w-4" />
               </button>
               <button
                 type="button"
+                className="flex h-10 w-10 items-center justify-center rounded-full bg-secondary/10 hover:bg-secondary/20 transition-all active:scale-90"
                 onClick={() => {
                   const next = redoStack[redoStack.length - 1];
                   if (!next) return;
@@ -1248,10 +1395,12 @@ export default function PhotoEditor({
                   restoreSnapshot(next);
                 }}
               >
-                <Redo2 className="h-5 w-5" />
+                <Redo2 className="h-4 w-4" />
               </button>
             </div>
-            <div className="flex items-center gap-3 text-[#9a9a9a]">
+
+            {/* Desktop Zoom - Hidden on Mobile */}
+            <div className="hidden items-center gap-3 text-[#9a9a9a] md:flex">
               <button type="button" onClick={() => setZoom((current) => Math.max(0.7, current - 0.1))}>
                 -
               </button>
@@ -1268,9 +1417,21 @@ export default function PhotoEditor({
                 +
               </button>
             </div>
+
+            {/* Mobile Header Actions */}
+            <div className="flex items-center gap-3 md:hidden">
+              <button
+                type="button"
+                onClick={() => setActiveMobilePanel("layouts")}
+                className="flex h-10 items-center gap-2 rounded-full border border-primary/20 bg-primary/5 px-4 text-[10px] font-black uppercase tracking-widest text-primary active:scale-95 transition-all"
+              >
+                <LayoutGrid className="h-3 w-3" />
+                Patterns
+              </button>
+            </div>
           </div>
 
-          <div className="relative min-h-0 flex-1 overflow-hidden px-7 pb-4">
+          <div className="relative min-h-0 flex-1 overflow-hidden px-4 pb-4 md:px-7">
             <button
               type="button"
               disabled={currentView === 0}
@@ -1279,7 +1440,7 @@ export default function PhotoEditor({
                 setCurrentView(next);
                 selectFirstEditablePageForView(next);
               }}
-              className="absolute left-3 top-1/2 z-20 -translate-y-1/2 text-[#95a1af] disabled:opacity-30"
+              className="absolute left-3 top-1/2 z-20 -translate-y-1/2 text-[#95a1af] disabled:opacity-30 md:left-3"
             >
               <ChevronLeft className="h-10 w-10" />
             </button>
@@ -1299,7 +1460,7 @@ export default function PhotoEditor({
 
             <div className="flex h-full items-center justify-center overflow-auto">
               <div
-                className={`flex items-start justify-center ${visiblePages.length === 1 ? "" : "gap-2"} origin-center transition-transform`}
+                className={`flex items-center justify-center ${visiblePages.length === 1 ? "" : "gap-2"} origin-center transition-transform`}
                 style={{ transform: `scale(${zoom})` }}
               >
                 {visiblePages.map((page) => {
@@ -1323,11 +1484,13 @@ export default function PhotoEditor({
                             setSelectedPageId(page.id);
                             setSelectedTarget({ type: "slot", pageId: page.id, slotId });
                             setActivePanel("images");
+                            if (window.innerWidth < 768) setActiveMobilePanel("library");
                           }}
                           onSelectCaption={(slotId) => {
                             setSelectedPageId(page.id);
                             setSelectedTarget({ type: "caption", pageId: page.id, slotId });
                             setActivePanel("text");
+                            if (window.innerWidth < 768) setActiveMobilePanel("text");
                           }}
                           onDropOnSlot={(slotId, url) => placePhotoOnPage(page.id, slotId, url)}
                         />
@@ -1427,22 +1590,34 @@ export default function PhotoEditor({
                 })}
               </div>
             </div>
-          </div>
 
-          <div className="border-t border-[#e6e0d8] bg-white px-4 py-3">
-            <div className="mb-2 flex items-center justify-end gap-3 text-[13px] text-[#6f737a]">
-              <span className="inline-flex items-center gap-2 rounded-full bg-white px-3 py-2 shadow-[0_4px_18px_rgba(0,0,0,0.06)]">
-                <span>📖</span>
-                Organize pages
-              </span>
-              <button type="button" onClick={addPage} title="Add 2 pages" className="flex h-8 w-8 items-center justify-center rounded bg-[#efefef] text-[#6b6b6b]">
-                <Plus className="h-4 w-4" />
-              </button>
-              <button type="button" onClick={deleteSelectedPage} className="flex h-8 w-8 items-center justify-center rounded bg-[#efefef] text-[#9b9b9b]">
-                <Trash2 className="h-4 w-4" />
+            {/* Mobile - Prominent Choose Layout Window Button below canvas */}
+            <div className="mt-8 flex justify-center md:hidden">
+              <button
+                type="button"
+                onClick={() => setActiveMobilePanel("layouts")}
+                className="group flex h-14 items-center gap-4 rounded-full bg-primary px-8 text-[11px] font-black uppercase tracking-[0.2em] text-white shadow-xl shadow-primary/20 transition-all active:scale-95"
+              >
+                <LayoutGrid className="h-4 w-4" />
+                Choose Layout
               </button>
             </div>
-            <div className="flex gap-3 overflow-x-auto pb-1">
+          </div>
+
+          <div className="border-t border-border/50 bg-white px-8 py-6">
+            <div className="mb-4 flex items-center justify-end gap-5 text-[10px] font-black uppercase tracking-widest text-foreground/40">
+              <span className="inline-flex items-center gap-3 rounded-full bg-white px-6 py-3 shadow-[0_8px_30px_rgb(0,0,0,0.06)] border border-border/20">
+                 <div className="h-2 w-2 rounded-full bg-green-500 animate-pulse"></div>
+                 Manage Pages
+              </span>
+              <button type="button" onClick={addPage} title="Add 2 pages" className="flex h-10 w-10 items-center justify-center rounded-2xl bg-secondary/30 text-primary hover:bg-primary hover:text-white transition-all active:scale-90 shadow-sm">
+                <Plus className="h-5 w-5" strokeWidth={3} />
+              </button>
+              <button type="button" onClick={deleteSelectedPage} className="flex h-10 w-10 items-center justify-center rounded-2xl bg-secondary/30 text-foreground/20 hover:text-primary transition-all active:scale-90 shadow-sm">
+                <Trash2 className="h-4 w-4" strokeWidth={3} />
+              </button>
+            </div>
+            <div className="flex gap-4 overflow-x-auto pb-4 pt-2 scrollbar-hide">
               {views.map((range, viewIndex) => (
                 <button
                   key={range.id}
@@ -1451,17 +1626,17 @@ export default function PhotoEditor({
                     setCurrentView(viewIndex);
                     selectFirstEditablePageForView(viewIndex);
                   }}
-                  className={`flex shrink-0 gap-2 border p-1 ${viewIndex === currentView ? "border-[#3f3f3f]" : "border-[#e4e4e4]"}`}
+                  className={`flex shrink-0 gap-3 border-2 p-2 rounded-[1.5rem] transition-all ${viewIndex === currentView ? "border-primary bg-primary/5 scale-105 shadow-xl shadow-primary/5" : "border-border/20 bg-white hover:border-primary/30"}`}
                 >
                   {range.pageIndices.map((pageIndex) => (
-                    <div key={pages[pageIndex].id} className="flex flex-col">
+                    <div key={pages[pageIndex].id} className="flex flex-col gap-2">
                       <div
-                        className="overflow-hidden border border-[#efefef] bg-white"
+                        className="overflow-hidden rounded-xl border border-border/30 bg-white shadow-sm"
                         style={{ width: `${editorMetrics.thumbnailWidth}px`, height: `${editorMetrics.thumbnailHeight}px` }}
                       >
                         <ThumbnailPreview page={pages[pageIndex]} />
                       </div>
-                      <span className="mt-1 text-[10px] text-[#707070]">{pages[pageIndex].label}</span>
+                      <span className="text-[8px] font-black uppercase tracking-widest text-foreground/40 text-center">{pages[pageIndex].label}</span>
                     </div>
                   ))}
                 </button>
@@ -1470,168 +1645,171 @@ export default function PhotoEditor({
           </div>
         </section>
 
-        <aside className="flex flex-col items-center border-l border-[#e2ded7] bg-white py-3">
+        {/* Right Sidebar - Layouts/Text/Edit (Desktop: Fixed, Mobile: Bottom Sheet Window) */}
+        <aside
+          className={`fixed inset-x-0 bottom-0 z-[70] h-[75vh] w-full overflow-hidden bg-white shadow-[0_-20px_50px_rgba(0,0,0,0.15)] transition-transform duration-500 ease-out rounded-t-[3rem] md:relative md:inset-y-0 md:right-0 md:h-full md:w-[300px] md:rounded-none md:shadow-none md:flex md:flex-row md:border-l md:border-border/50 md:z-0 md:translate-x-0 ${
+            isMobile && (activeMobilePanel === "layouts" || activeMobilePanel === "text" || activeMobilePanel === "backgrounds") ? "translate-y-0" : isMobile ? "translate-y-full" : ""
+          }`}
+        >
+          {/* Desktop Panel Icons - Hidden on Mobile */}
+          <div className="hidden flex-col items-center border-r border-border/50 bg-white py-8 gap-8 md:flex md:w-[48px]">
+            {[
+              { id: "text" as const, Icon: Type },
+              { id: "layouts" as const, Icon: LayoutGrid },
+              { id: "backgrounds" as const, Icon: Palette },
+            ].map(({ id, Icon }) => (
+              <button
+                key={id}
+                type="button"
+                onClick={() => setActivePanel(id)}
+                className={`flex h-10 w-10 items-center justify-center rounded-2xl transition-all active:scale-90 ${
+                  activePanel === id ? "bg-primary text-white shadow-xl shadow-primary/20" : "text-foreground/20 hover:bg-secondary/30 hover:text-foreground/40"
+                }`}
+              >
+                <Icon className="h-5 w-5" strokeWidth={activePanel === id ? 3 : 2} />
+              </button>
+            ))}
+          </div>
+
+          <div className="relative flex flex-1 flex-col min-h-0 bg-white">
+            <div className="flex items-center justify-between border-b border-border/50 px-5 py-6 md:hidden">
+              <div className="text-[10px] font-black uppercase tracking-[0.2em] text-foreground/40">
+                {activeMobilePanel === "layouts" ? "Layouts" : "Editing"}
+              </div>
+              <button type="button" onClick={() => setActiveMobilePanel("none")} className="p-2 text-foreground/30">
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+
+            <div className="flex-1 overflow-y-auto scrollbar-hide">
+              {(activeMobilePanel === "layouts" || (activePanel === "layouts" && !isMobile)) ? (
+                <div className="h-full">
+                  <div className="hidden border-b border-border/50 px-6 py-6 text-[10px] font-black uppercase tracking-[0.2em] text-foreground/40 md:block">Choose Layout</div>
+                  <div className="grid grid-cols-2 gap-4 px-4 pb-12 pt-6 md:pt-0">
+                    {LAYOUTS.filter((layout) => layout.id !== "front-cover-square").map((layout) => (
+                      <button
+                        key={layout.id}
+                        type="button"
+                        onClick={() => {
+                          if (activePage && activePage.kind === "page") {
+                            applyLayout(activePage.id, layout.id);
+                            if (window.innerWidth < 768) setActiveMobilePanel("none");
+                          }
+                        }}
+                        className={`relative overflow-hidden rounded-2xl border-2 transition-all p-2 ${
+                          activePage?.layoutId === layout.id ? "border-primary bg-primary/5 shadow-xl shadow-primary/5 scale-105" : "border-border/20 bg-white hover:border-primary/20"
+                        } ${activePage?.kind !== "page" ? "opacity-30 cursor-not-allowed" : ""}`}
+                        style={{ aspectRatio: String(sizePreset.pageAspectRatio) }}
+                      >
+                        <LayoutPreview layout={layout} />
+                        {activePage?.layoutId === layout.id ? (
+                          <div className="absolute right-2 top-2 flex h-4 w-4 items-center justify-center rounded-full bg-primary text-[6px] font-black text-white shadow-lg">✓</div>
+                        ) : null}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              ) : null}
+
+              {(activeMobilePanel === "text" || (activePanel === "text" && !isMobile)) ? (
+                <div className="h-full px-6 py-8 flex flex-col gap-10">
+                  <div className="text-[10px] font-black uppercase tracking-[0.2em] text-foreground/40">Typography & Content</div>
+                  {selectedTarget?.type === "caption" && activePage ? (
+                    <div className="flex flex-col gap-10">
+                      <div className="flex flex-col gap-4">
+                        <p className="text-[10px] font-black uppercase tracking-widest text-foreground/60">Alignment</p>
+                        <div className="grid grid-cols-3 gap-3">
+                          {(["left", "center", "right"] as TextAlign[]).map((align) => (
+                            <button
+                              key={align}
+                              type="button"
+                              onClick={() => setPageTextAlign(align)}
+                              className={`rounded-2xl py-4 text-[10px] font-black uppercase tracking-widest transition-all ${
+                                activePage.textAlign === align ? "bg-primary text-white shadow-xl shadow-primary/20" : "bg-secondary/20 text-foreground/40 hover:bg-secondary/40"
+                              }`}
+                            >
+                              {align}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                      <div className="flex flex-col gap-4">
+                        <p className="text-[10px] font-black uppercase tracking-widest text-foreground/60">Style Preset</p>
+                        <div className="relative">
+                          <select
+                            value={activePage.font}
+                            onChange={(event) => setPageFont(event.target.value as FontOption)}
+                            className="w-full rounded-2xl bg-secondary/10 px-4 py-4 text-[10px] font-black uppercase tracking-widest text-primary focus:outline-none border-2 border-border/20 focus:border-primary transition-all appearance-none"
+                          >
+                            <option value="classic">Classic Serif</option>
+                            <option value="modern">Modern Sans</option>
+                            <option value="editorial">Editorial Look</option>
+                          </select>
+                          <div className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-primary">
+                            <ChevronDown className="h-4 w-4" />
+                          </div>
+                        </div>
+                      </div>
+                      <div className="flex flex-col gap-4">
+                        <p className="text-[10px] font-black uppercase tracking-widest text-foreground/60">Caption</p>
+                        <textarea
+                          value={selectedSlot?.caption ?? ""}
+                          onChange={(event) => updateCaptionText(event.target.value)}
+                          rows={6}
+                          placeholder="Type your memory here..."
+                          className="w-full rounded-3xl bg-secondary/10 px-5 py-5 text-[11px] font-medium leading-relaxed text-foreground placeholder:text-foreground/20 focus:outline-none border-2 border-border/20 focus:border-primary transition-all scrollbar-hide resize-none"
+                        />
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => setActiveMobilePanel("none")}
+                        className="mt-4 h-14 rounded-full bg-primary-pressed text-[10px] font-black uppercase tracking-widest text-white shadow-xl shadow-primary-pressed/20 md:hidden"
+                      >
+                        Done Editing
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="mt-12 text-[11px] font-bold uppercase tracking-[0.2em] leading-relaxed text-foreground/20 text-center px-4">
+                       Select a text area on your page to edit captions or change styles
+                    </div>
+                  )}
+                </div>
+              ) : null}
+
+              {activePanel === "backgrounds" ? (
+                <div className="h-full px-6 py-6 flex flex-col gap-8">
+                  <div className="text-[10px] font-black uppercase tracking-[0.2em] text-foreground/40">Backgrounds</div>
+                  <div className="mt-20 flex flex-col items-center justify-center gap-6 text-center opacity-20">
+                     <div className="h-20 w-20 rounded-full bg-secondary/30 flex items-center justify-center">
+                        <Palette className="h-8 w-8" />
+                     </div>
+                     <p className="text-[10px] font-black uppercase tracking-widest leading-loose">No alternative themes available for this edition</p>
+                  </div>
+                </div>
+              ) : null}
+            </div>
+          </div>
+        </aside>
+
+        <nav className="z-[60] flex h-[72px] shrink-0 items-center justify-around border-t border-border/50 bg-white px-6 pb-safe md:hidden">
           {[
-            { id: "images" as const, Icon: ImageIcon },
-            { id: "text" as const, Icon: Type },
-            { id: "layouts" as const, Icon: LayoutGrid },
-            { id: "backgrounds" as const, Icon: Palette },
-          ].map(({ id, Icon }) => (
+            { id: "library", label: "Photos", Icon: ImageIcon },
+            { id: "layouts", label: "Layouts", Icon: LayoutGrid },
+            { id: "text", label: "Text", Icon: Type },
+          ].map(({ id, label, Icon }) => (
             <button
               key={id}
               type="button"
-              onClick={() => setActivePanel(id)}
-              className={`mb-6 flex h-10 w-10 items-center justify-center rounded ${activePanel === id ? "text-[#111]" : "text-[#888]"}`}
+              onClick={() => setActiveMobilePanel(activeMobilePanel === id ? "none" : (id as any))}
+              className={`flex flex-col items-center gap-1.5 transition-all active:scale-95 ${
+                activeMobilePanel === id ? "text-primary scale-110" : "text-foreground/30 hover:text-foreground/50"
+              }`}
             >
-              <Icon className="h-5 w-5" />
+              <Icon className="h-5 w-5" strokeWidth={activeMobilePanel === id ? 3 : 2} />
+              <span className="text-[9px] font-black uppercase tracking-widest">{label}</span>
             </button>
           ))}
-        </aside>
-
-        <aside className="border-l border-[#e2ded7] bg-white">
-          {activePanel === "layouts" ? (
-            <div className="h-full overflow-y-auto">
-              <div className="px-4 py-4 text-[13px] font-semibold text-[#555]">Layouts:</div>
-              <div className="grid grid-cols-2 gap-3 px-3 pb-4">
-                {LAYOUTS.filter((layout) => layout.id !== "front-cover-square").map((layout) => (
-                  <button
-                    key={layout.id}
-                    type="button"
-                    onClick={() => {
-                      if (activePage && activePage.kind === "page") {
-                        applyLayout(activePage.id, layout.id);
-                      }
-                    }}
-                    className={`relative overflow-hidden border p-2 ${
-                      activePage?.layoutId === layout.id ? "border-[#444]" : "border-[#ececec]"
-                    } ${activePage?.kind !== "page" ? "opacity-50" : ""}`}
-                    style={{ aspectRatio: String(sizePreset.pageAspectRatio) }}
-                  >
-                    <LayoutPreview layout={layout} />
-                    {activePage?.layoutId === layout.id ? (
-                      <div className="absolute right-2 top-2 flex h-5 w-5 items-center justify-center rounded-full bg-[#222] text-[10px] text-white">✓</div>
-                    ) : null}
-                  </button>
-                ))}
-              </div>
-            </div>
-          ) : null}
-
-          {activePanel === "images" ? (
-            <div className="h-full px-4 py-4">
-              <div className="text-[13px] font-semibold text-[#555]">Edit Image:</div>
-              {selectedSlot ? (
-                <div className="mt-6 space-y-5">
-                  <div>
-                    <div className="mb-3 flex items-center justify-between text-[13px] text-[#666]">
-                      <span>Zoom</span>
-                      <span>{selectedSlot.zoom.toFixed(1)}</span>
-                    </div>
-                    <input
-                      type="range"
-                      min="1"
-                      max="2"
-                      step="0.05"
-                      value={selectedSlot.zoom}
-                      onChange={(event) =>
-                        updateSelectedSlot((slot) => ({
-                          ...slot,
-                          zoom: Number(event.target.value),
-                        }))
-                      }
-                      className="w-full accent-[#999]"
-                    />
-                  </div>
-                  <div>
-                    <p className="mb-3 text-[13px] text-[#666]">Filters</p>
-                    <div className="grid grid-cols-2 gap-3">
-                      {(["grayscale", "sepia"] as ImageFilter[]).map((filter) => (
-                        <button
-                          key={filter}
-                          type="button"
-                          onClick={() =>
-                            updateSelectedSlot((slot) => ({
-                              ...slot,
-                              filter,
-                            }))
-                          }
-                          className={`rounded-[8px] px-3 py-3 text-[13px] ${
-                            selectedSlot.filter === filter ? "bg-[#efefef] text-[#222]" : "bg-[#f7f7f7] text-[#666]"
-                          }`}
-                        >
-                          {filter === "grayscale" ? "Grayscale" : "Sepia"}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              ) : (
-                <div className="mt-10 text-[13px] leading-6 text-[#8a8a8a]">
-                  Select a photo placeholder on the page, then upload or click an image from the left sidebar to place it.
-                </div>
-              )}
-            </div>
-          ) : null}
-
-          {activePanel === "text" ? (
-            <div className="h-full px-4 py-4">
-              <div className="text-[13px] font-semibold text-[#555]">Edit Text:</div>
-              {selectedTarget?.type === "caption" && activePage ? (
-                <div className="mt-6 space-y-5">
-                  <div>
-                    <p className="mb-3 text-[13px] text-[#666]">Alignment</p>
-                    <div className="grid grid-cols-3 gap-2">
-                      {(["left", "center", "right"] as TextAlign[]).map((align) => (
-                        <button
-                          key={align}
-                          type="button"
-                          onClick={() => setPageTextAlign(align)}
-                          className={`rounded-[8px] px-3 py-3 text-[13px] ${
-                            activePage.textAlign === align ? "bg-[#696969] text-white" : "bg-[#f7f7f7] text-[#666]"
-                          }`}
-                        >
-                          {align}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                  <div>
-                    <p className="mb-3 text-[13px] text-[#666]">Font</p>
-                    <select
-                      value={activePage.font}
-                      onChange={(event) => setPageFont(event.target.value as FontOption)}
-                      className="w-full rounded-[8px] border border-[#efefef] bg-[#fafafa] px-3 py-3 text-[13px] text-[#555] outline-none"
-                    >
-                      <option value="classic">Classic Serif</option>
-                      <option value="modern">Modern Sans</option>
-                      <option value="editorial">Editorial Serif</option>
-                    </select>
-                  </div>
-                  <div>
-                    <p className="mb-3 text-[13px] text-[#666]">Caption</p>
-                    <textarea
-                      value={selectedSlot?.caption ?? ""}
-                      onChange={(event) => updateCaptionText(event.target.value)}
-                      rows={5}
-                      className="w-full rounded-[8px] border border-[#efefef] bg-[#fafafa] px-3 py-3 text-[13px] text-[#555] outline-none"
-                    />
-                  </div>
-                </div>
-              ) : (
-                <div className="mt-10 text-[13px] leading-6 text-[#8a8a8a]">
-                  Click a caption box on the page to edit alignment and font.
-                </div>
-              )}
-            </div>
-          ) : null}
-
-          {activePanel === "backgrounds" ? (
-            <div className="h-full px-4 py-4">
-              <div className="text-[13px] font-semibold text-[#555]">Backgrounds:</div>
-              <div className="mt-10 text-center text-[14px] leading-7 text-[#7f7f7f]">No backgrounds available for this page.</div>
-            </div>
-          ) : null}
-        </aside>
+        </nav>
       </div>
     </div>
   );

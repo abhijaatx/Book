@@ -87,60 +87,43 @@ const SIZE_PRESET_META: Record<
 };
 
 const categories: CategorySeed[] = [
-  { slug: "anniversary", name: "Anniversary", description: "Romantic storytelling books and albums for milestone gifting.", hero: "Built for vows, candlelit timelines, and keepsake-worthy portraits.", defaultType: "book", basePrice: 2499, palette: ["#f9d8df", "#f3b2c0", "#7b284e", "#ffffff", "#fff6f8"] },
-  { slug: "birthday", name: "Birthday", description: "High-energy memory books for birthdays of every age.", hero: "Confetti-forward layouts for party highlights, portraits, and guest notes.", defaultType: "book", basePrice: 1899, palette: ["#ffd9a6", "#ff8f70", "#7f1944", "#fff8f3", "#fff4ed"] },
-  { slug: "wedding", name: "Wedding", description: "Editorial heirloom albums and elegant storybooks for ceremony-to-reception coverage.", hero: "Premium spreads, tactile covers, and a timeless printed finish.", defaultType: "album", basePrice: 5799, palette: ["#f6efe8", "#d4bda9", "#5f4636", "#fffdfb", "#fdf8f2"] },
-  { slug: "albums", name: "Custom Albums", description: "Luxury albums for travel, family, weddings, and premium archival gifting.", hero: "Large-format, lay-flat, print-first products designed for shelf presence.", defaultType: "album", basePrice: 4999, palette: ["#e7f0ef", "#9fc0bb", "#244e52", "#f9fefe", "#f2fbfa"] },
-  { slug: "baby-kids", name: "Baby & Kids", description: "Milestone books and gentle keepsakes for first smiles, first steps, and beyond.", hero: "Soft palettes, playful details, and guided prompts for little-big moments.", defaultType: "book", basePrice: 2099, palette: ["#dff5ec", "#b1dfd0", "#2d6a60", "#fbfffe", "#f3fffb"] },
-  { slug: "proposal", name: "Proposal", description: "Compact romantic books crafted to build toward the biggest question.", hero: "Small-format storytelling, ring-box reveals, and cinematic emotional pacing.", defaultType: "book", basePrice: 1799, palette: ["#f6e8df", "#e0b9a8", "#6a2f23", "#fffbf8", "#fff7f1"] },
-  { slug: "valentines", name: "Valentines", description: "Intimate romantic books and luxe micro-gifts for heartfelt surprises.", hero: "Rich reds, handwritten notes, and emotional stories in small formats.", defaultType: "book", basePrice: 1599, palette: ["#f7c0c7", "#d94f70", "#6f1537", "#fff8fb", "#fff2f5"] },
-  { slug: "travel", name: "Travel", description: "Coffee-table albums and destination journals for adventure-filled memories.", hero: "Panoramic spreads, postcard cues, and storytelling tuned for motion.", defaultType: "album", basePrice: 4699, palette: ["#d8ecff", "#89b8e2", "#1d4d78", "#f8fcff", "#eff8ff"] },
-  { slug: "family", name: "Family", description: "Multi-generational keepsakes for reunions, traditions, and everyday archives.", hero: "Made for old photos, festival snapshots, and living-room nostalgia.", defaultType: "album", basePrice: 3999, palette: ["#e9e1d4", "#c4a98a", "#5c4533", "#fffdf9", "#fbf6ef"] },
-  { slug: "friendship", name: "Friendship", description: "Playful books for road trips, college years, roommates, and chosen family.", hero: "Bold colors, collage energy, and celebration-first storytelling.", defaultType: "book", basePrice: 1749, palette: ["#d4dbff", "#8c9fff", "#293a8f", "#f9fbff", "#eff2ff"] },
+  { slug: "planners", name: "Planners", description: "2024-25 and undated planners to organize your magic.", hero: "Design your days, weeks, and months with our signature planners.", defaultType: "book", basePrice: 1499, palette: ["#FFFDF5", "#8B0000", "#1A1A1A", "#D4AF37", "#F4C2C2"] },
+  { slug: "notebooks", name: "Notebooks", description: "Ruled and dotted notebooks for your biggest ideas.", hero: "High-quality paper and beautiful covers that inspire writing.", defaultType: "book", basePrice: 499, palette: ["#FFFDF5", "#8B0000", "#1A1A1A", "#D4AF37", "#F4C2C2"] },
+  { slug: "photobooks", name: "Photobooks", description: "Softcover and hardcover books for your favorite chapters.", hero: "Turn digital memories into tangible keepsakes.", defaultType: "book", basePrice: 1899, palette: ["#FFFDF5", "#8B0000", "#1A1A1A", "#D4AF37", "#F4C2C2"] },
+  { slug: "magazines", name: "Magazines", description: "Premium photo magazines for your coffee table stories.", hero: "Your life, editorialized. Softcover magazines with a high-fashion feel.", defaultType: "book", basePrice: 1299, palette: ["#FFFDF5", "#8B0000", "#1A1A1A", "#D4AF37", "#F4C2C2"] },
+  { slug: "newspapers", name: "Newspapers", description: "Daily chronicles and special edition personal news.", hero: "The headline is you. Retro-style newspapers for milestones and memories.", defaultType: "book", basePrice: 899, palette: ["#FFFDF5", "#8B0000", "#1A1A1A", "#D4AF37", "#F4C2C2"] },
+  { slug: "new", name: "New In", description: "The latest chapters in our story. Discover our newest designs.", hero: "Freshly arrived treasures for your curated life.", defaultType: "book", basePrice: 499, palette: ["#FFFDF5", "#8B0000", "#1A1A1A", "#D4AF37", "#F4C2C2"] },
+  { slug: "sale", name: "Sale", description: "Last chance to own these magic keepsakes at a special price.", hero: "Curated favorites, now more accessible than ever.", defaultType: "book", basePrice: 299, palette: ["#FFFDF5", "#8B0000", "#1A1A1A", "#D4AF37", "#F4C2C2"] },
+  { slug: "stationery", name: "Stationery", description: "Stickers, notecards, and more to brighten your desk.", hero: "The little things that make everyday life more magic.", defaultType: "book", basePrice: 299, palette: ["#FFFDF5", "#8B0000", "#1A1A1A", "#D4AF37", "#F4C2C2"] },
 ];
 
 const collections: CollectionSeed[] = [
-  { slug: "moonlit-keepsake", title: "Moonlit Keepsake", vibe: "soft editorial romance", angle: "layered with handwritten notes and cinematic pacing", priceDelta: 0 },
-  { slug: "velvet-bloom", title: "Velvet Bloom", vibe: "textural luxury", angle: "ideal for high-contrast portraits and tactile cover finishes", priceDelta: 140 },
-  { slug: "golden-chapter", title: "Golden Chapter", vibe: "warm heirloom styling", angle: "made for milestone timelines, speeches, and celebratory sequences", priceDelta: 260 },
-  { slug: "starlit-mosaic", title: "Starlit Mosaic", vibe: "collage-first storytelling", angle: "best for layered moments, captions, and playful sequencing", priceDelta: 380 },
-  { slug: "rosewood-reverie", title: "Rosewood Reverie", vibe: "rich nostalgia", angle: "gives photo-heavy stories a grounded, classic mood", priceDelta: 520 },
-  { slug: "pearl-edition", title: "Pearl Edition", vibe: "clean premium minimalism", angle: "perfect when the photography should carry the emotion", priceDelta: 660, forceType: "album" },
-  { slug: "letterbox-luxe", title: "Letterbox Luxe", vibe: "cinematic sequencing", angle: "great for dramatic portraits, travel scenes, and reveal moments", priceDelta: 780 },
-  { slug: "petalpress", title: "Petalpress", vibe: "romantic floral detailing", angle: "designed for expressive captions and intimate gifting", priceDelta: 910 },
-  { slug: "studio-cut", title: "Studio Cut", vibe: "modern collage polish", angle: "balances clean typography with quick-moving visual stories", priceDelta: 1030 },
-  { slug: "cinema-strip", title: "Cinema Strip", vibe: "film-frame nostalgia", angle: "works beautifully for candid sequences and movement-heavy stories", priceDelta: 1160 },
-  { slug: "sunset-chronicle", title: "Sunset Chronicle", vibe: "golden-hour warmth", angle: "tuned for glow-heavy imagery, celebrations, and travel frames", priceDelta: 1280 },
-  { slug: "midnight-echo", title: "Midnight Echo", vibe: "dark luxe contrast", angle: "adds drama for editorial portraits and moody black-and-white edits", priceDelta: 1410 },
-  { slug: "silkbound-secrets", title: "Silkbound Secrets", vibe: "quiet intimacy", angle: "built around personal letters, notes, and keepsake moments", priceDelta: 1530 },
-  { slug: "confetti-journal", title: "Confetti Journal", vibe: "celebration-driven energy", angle: "perfect for birthdays, graduation-style joy, and group photos", priceDelta: 1660 },
-  { slug: "cedar-heirloom", title: "Cedar Heirloom", vibe: "museum-inspired legacy", angle: "crafted to feel substantial on a shelf and timeless in hand", priceDelta: 1780, forceType: "album" },
-  { slug: "postcard-atlas", title: "Postcard Atlas", vibe: "travel-documentary style", angle: "brings maps, ticket-stub energy, and panoramic frames together", priceDelta: 1910, forceType: "album" },
-  { slug: "keepsake-capsule", title: "Keepsake Capsule", vibe: "memory-box curation", angle: "great for milestone years, baby books, and family archives", priceDelta: 2040 },
-  { slug: "grand-signature", title: "Grand Signature", vibe: "statement-piece craftsmanship", angle: "designed for showcase gifting with premium tactile finishes", priceDelta: 2180, forceType: "album" },
-  { slug: "love-note-press", title: "Love Note Press", vibe: "letter-led storytelling", angle: "built for emotionally rich pages and quiet personal details", priceDelta: 2310 },
-  { slug: "gallery-archive", title: "Gallery Archive", vibe: "curated exhibition polish", angle: "excellent for premium edits, artful spacing, and shelf-worthy display", priceDelta: 2440, forceType: "album" },
+  { slug: "everything-magic", title: "Everything is Magic", vibe: "optimistic & bright", angle: "centered around colorful typography and cheerful vibes", priceDelta: 0 },
+  { slug: "go-getter", title: "Go Getter", vibe: "minimalist & focused", angle: "designed for those who love clean lines and bold statements", priceDelta: 200 },
+  { slug: "celestial", title: "Celestial Dreams", vibe: "ethereal & moody", angle: "featuring stars, moons, and magical midnight palettes", priceDelta: 400 },
+  { slug: "blooming", title: "In Full Bloom", vibe: "floral & delicate", angle: "soft colors and organic shapes for a gentle touch", priceDelta: 300 },
+  { slug: "classic-og", title: "Classic Odd Giraffe", vibe: "iconic & bold", angle: "the signature yellow look that started it all", priceDelta: 100 },
 ];
 
 const albumVariants: ProductVariant[] = [
-  { name: "Material", options: ["Vegan Suede", "Premium Linen (+₹450)", "Italian Leather (+₹1100)"] },
-  { name: "Page Count", options: ["20 Pages", "40 Pages (+₹1200)", "60 Pages (+₹2200)"] },
+  { name: "Format", options: ["Hardcover", "Softcover (-₹400)", "Premium Linen (+₹800)"] },
+  { name: "Paper Type", options: ["Matte Finish", "Lustre (+₹200)", "Recycled Eco (+₹150)"] },
 ];
 
 const bookVariants: ProductVariant[] = [
-  { name: "Cover", options: ["Soft Touch", "Silk Hardcover (+₹350)", "Velvet Edition (+₹750)"] },
+  { name: "Ruling", options: ["Ruled", "Dotted", "Plain", "Grid"] },
 ];
 
 const BOOK_SIZE_PRICING: Record<SizePresetId, number> = {
   mini: 0,
-  medium: 550,
-  large: 1100,
+  medium: 300,
+  large: 600,
 };
 
 const ALBUM_SIZE_PRICING: Record<SizePresetId, number> = {
   mini: 0,
-  medium: 900,
-  large: 1600,
+  medium: 500,
+  large: 1000,
 };
 
 const DEFAULT_SIZE_ROTATION: SizePresetId[] = ["medium", "mini", "large"];
@@ -178,6 +161,25 @@ function buildSizePresets(type: Product["type"], defaultSizePresetId: SizePreset
   }));
 }
 
+const REAL_IMAGES: Record<string, string[]> = {
+  planners: [
+    "https://oddgiraffe.com/cdn/shop/files/371_68c793cc-7bf7-4bf9-903a-ff56f36b367b.webp?v=1763827789&width=1109",
+    "https://oddgiraffe.com/cdn/shop/files/376_7123a00c-cb84-4914-bb95-f68303f5815d.webp?v=1763839823&width=1109"
+  ],
+  notebooks: [
+    "https://oddgiraffe.com/cdn/shop/files/364-nb_ac214c64-f0e6-44f2-b88c-9558ec1b78f3.webp?v=1734873083&width=1109",
+    "https://oddgiraffe.com/cdn/shop/files/324.webp?v=1725450213&width=1109"
+  ],
+  photobooks: [
+    "https://oddgiraffe.com/cdn/shop/files/27_d651c038-95c6-4c3e-82f3-8c0b745d1f6f.webp?v=1754334026&width=1109",
+    "https://oddgiraffe.com/cdn/shop/files/SPB1_933961c6-d735-4c2e-890f-32b4bb25b31e.webp?v=1754333957&width=1109"
+  ],
+  stationery: [
+    "https://oddgiraffe.com/cdn/shop/files/347-NB_1.webp?v=1753570428&width=1109",
+    "https://oddgiraffe.com/cdn/shop/files/pnb-26_27b8f0cf-ca41-45a2-993c-92e6e42f1eec.webp?v=1763842598&width=1109"
+  ]
+};
+
 function createProductImage(
   title: string,
   category: string,
@@ -186,47 +188,33 @@ function createProductImage(
   sizePreset: SizePreset,
   variant: number,
 ): string {
-  const [from, to, accent, text, frame] = palette;
+  const [bg, _, text, accent, detail] = palette;
   const lines = coverLines(title);
   const viewHeight = 1200;
   const viewWidth = Math.round(viewHeight * sizePreset.catalogAspectRatio);
-  const coverHeight = Math.round(viewHeight * (0.7 + sizePreset.editorScale * 0.18));
-  const coverWidth = Math.min(Math.round(coverHeight * sizePreset.pageAspectRatio), Math.round(viewWidth * 0.88));
-  const coverX = Math.round((viewWidth - coverWidth) / 2);
-  const coverY = Math.round((viewHeight - coverHeight) / 2);
-  const frameInset = Math.max(28, Math.round(Math.min(coverWidth, coverHeight) * 0.055));
-  const titleSize = sizePreset.id === "large" ? 54 : sizePreset.id === "mini" ? 50 : 58;
-  const subtitleY = coverY + coverHeight - frameInset - 48;
-  const badgeY = coverY + frameInset + 54;
+  const titleSize = 72;
 
+  // Kahaani Minimalist Design (Premium Style)
   const svg = `
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${viewWidth} ${viewHeight}">
-      <defs>
-        <linearGradient id="bg" x1="0%" x2="100%" y1="0%" y2="100%">
-          <stop offset="0%" stop-color="${from}" />
-          <stop offset="100%" stop-color="${to}" />
-        </linearGradient>
-        <filter id="shadow" x="-20%" y="-20%" width="140%" height="160%">
-          <feDropShadow dx="0" dy="36" stdDeviation="32" flood-color="#000000" flood-opacity="0.15" />
-        </filter>
-      </defs>
-      <rect width="${viewWidth}" height="${viewHeight}" fill="#ffffff" />
-      <circle cx="${variant === 0 ? Math.round(viewWidth * 0.86) : Math.round(viewWidth * 0.18)}" cy="${variant === 0 ? 160 : 1040}" r="${Math.round(Math.min(viewWidth, viewHeight) * 0.18)}" fill="${accent}" opacity="${variant === 0 ? "0.18" : "0.14"}" />
-      <circle cx="${variant === 0 ? Math.round(viewWidth * 0.14) : Math.round(viewWidth * 0.84)}" cy="${variant === 0 ? 1030 : 220}" r="${Math.round(Math.min(viewWidth, viewHeight) * 0.14)}" fill="${from}" opacity="0.3" />
-      <g filter="url(#shadow)">
-        <rect x="${coverX}" y="${coverY}" width="${coverWidth}" height="${coverHeight}" rx="20" fill="url(#bg)" />
-        <rect x="${coverX + frameInset}" y="${coverY + frameInset}" width="${coverWidth - frameInset * 2}" height="${coverHeight - frameInset * 2}" rx="12" fill="${frame}" opacity="0.92" />
-        <rect x="${coverX + frameInset * 1.45}" y="${coverY + frameInset * 2.4}" width="${coverWidth - frameInset * 2.9}" height="${Math.round(coverHeight * 0.38)}" rx="8" fill="url(#bg)" opacity="0.96" stroke="#ffffff" stroke-opacity="0.65" stroke-width="5" />
-        <text x="${coverX + coverWidth / 2}" y="${badgeY}" fill="${text}" font-size="22" font-family="Arial, sans-serif" text-anchor="middle" letter-spacing="4">${sizePreset.label.toUpperCase()}</text>
+      <rect width="${viewWidth}" height="${viewHeight}" fill="${variant === 0 ? bg : "#1a1a1a"}" />
+      
+      <!-- Decorative Graphic Element -->
+      <circle cx="${viewWidth / 2}" cy="${viewHeight / 2}" r="${viewWidth * 0.4}" fill="${variant === 0 ? "white" : bg}" opacity="0.1" />
+      
+      <g transform="translate(${viewWidth / 2}, ${viewHeight / 2})">
         ${lines
           .map(
             (line, index) =>
-              `<text x="${coverX + coverWidth / 2}" y="${coverY + frameInset * 5 + index * (titleSize + 18)}" fill="${text}" font-size="${line.length > 15 ? titleSize - 6 : titleSize}" font-family="Georgia, serif" font-weight="700" text-anchor="middle">${line}</text>`,
+              `<text y="${(index - lines.length / 2 + 0.5) * (titleSize + 20)}" fill="${variant === 0 ? text : bg}" font-size="${titleSize}" font-family="Georgia, serif" font-weight="700" text-anchor="middle" style="font-style: italic; letter-spacing: -0.04em;">${line.toLowerCase()}</text>`,
           )
           .join("")}
-        <text x="${coverX + coverWidth / 2}" y="${subtitleY}" fill="${text}" font-size="24" font-family="Arial, sans-serif" text-anchor="middle" letter-spacing="5">${category.toUpperCase()}</text>
-        <text x="${coverX + coverWidth / 2}" y="${subtitleY + 46}" fill="${text}" font-size="20" font-family="Arial, sans-serif" text-anchor="middle" opacity="0.82">${type === "album" ? "LAY-FLAT HEIRLOOM EDITION" : "PERSONALIZED STORYBOOK EDITION"}</text>
       </g>
+
+      <text x="${viewWidth / 2}" y="${viewHeight - 120}" fill="${variant === 0 ? text : bg}" font-size="14" font-family="Arial, sans-serif" font-weight="900" text-anchor="middle" letter-spacing="4" opacity="0.4">DESIGNED FOR MAGIC | KAHAANI</text>
+      
+      <!-- Small Logo Icon -->
+      <circle cx="${viewWidth / 2}" cy="120" r="15" fill="${variant === 0 ? text : bg}" />
     </svg>
   `;
 
@@ -236,23 +224,27 @@ function createProductImage(
 const products: Product[] = categories.flatMap((category, categoryIndex) =>
   collections.map((collection, collectionIndex) => {
     const type = collection.forceType ?? category.defaultType;
-    const label = type === "album" ? "Album" : "Storybook";
-    const name = `${collection.title} ${category.name} ${label}`;
+    const label = type === "album" ? "Album" : "Book";
+    const name = `${collection.title}`;
     const defaultSizePresetId = DEFAULT_SIZE_ROTATION[(categoryIndex + collectionIndex) % DEFAULT_SIZE_ROTATION.length];
     const sizePresets = buildSizePresets(type, defaultSizePresetId);
+    
+    // Mix actual images with generated ones for variety
+    const realImages = REAL_IMAGES[category.slug] || [];
     const previewImagesBySize = Object.fromEntries(
       (["mini", "medium", "large"] as SizePresetId[]).map((sizePresetId) => {
         const sizePreset = sizePresets.find((item) => item.id === sizePresetId) ?? sizePresets[0];
         return [
           sizePresetId,
           [
+            realImages[0] ?? createProductImage(name, category.name, type, category.palette, sizePreset, 0),
+            realImages[1] ?? createProductImage(name, category.name, type, category.palette, sizePreset, 1),
             createProductImage(name, category.name, type, category.palette, sizePreset, 0),
-            createProductImage(name, category.name, type, [category.palette[1], category.palette[0], category.palette[2], category.palette[3], category.palette[4]], sizePreset, 1),
           ],
         ];
       }),
     ) as Record<SizePresetId, string[]>;
-    const price = category.basePrice + collection.priceDelta + (type === "album" ? 900 : 0);
+    const price = category.basePrice + collection.priceDelta;
     const rating = Number((4.6 + ((categoryIndex + collectionIndex) % 5) * 0.1).toFixed(1));
     const reviews = 32 + categoryIndex * 12 + collectionIndex * 8;
 
@@ -260,8 +252,8 @@ const products: Product[] = categories.flatMap((category, categoryIndex) =>
       id: `${category.slug}-${collection.slug}`,
       name,
       slug: `${category.slug}-${collection.slug}`,
-      description: `${collection.vibe[0].toUpperCase()}${collection.vibe.slice(1)} ${type === "album" ? "album" : "storybook"} for ${category.name.toLowerCase()} gifting, ${collection.angle}.`,
-      longDescription: `${name} is part of our ${collection.title} line, a ${collection.vibe} collection created for ${category.name.toLowerCase()} memories. ${category.hero} Every piece is handcrafted in our studio and finished with premium paper stocks, tactile cover materials, and generous room for photos, notes, and story-led layouts. This edition is ${collection.angle}, making it a strong choice when you want your gift to feel custom, elevated, and unmistakably personal.`,
+      description: `${collection.vibe}. ${collection.angle}. Crafted with love by Kahaani.`,
+      longDescription: `${name} is a part of our ${collection.title} collection by Kahaani. ${collection.angle}. Designed for those who want to make every day magic. High-quality paper, premium finishes, and thoughtful details throughout.`,
       basePrice: price,
       images: previewImagesBySize[defaultSizePresetId],
       previewImagesBySize,
@@ -272,10 +264,11 @@ const products: Product[] = categories.flatMap((category, categoryIndex) =>
       variants: type === "album" ? albumVariants : bookVariants,
       reviews,
       rating,
-      featured: collectionIndex < 2 || collectionIndex % 7 === 0,
+      featured: collectionIndex < 2 || (categoryIndex === 0 && collectionIndex === 0),
     };
   }),
 );
+
 
 export function getSizePresetById(product: Product, sizePresetId?: string | null): SizePreset {
   return product.sizePresets.find((sizePreset) => sizePreset.id === sizePresetId) ?? product.sizePresets[0];

@@ -1,6 +1,5 @@
 import Image from "next/image";
 import Link from "next/link";
-import { Heart, ShoppingBag } from "lucide-react";
 import {
   getDefaultSizePreset,
   getProductImagesForSize,
@@ -18,48 +17,42 @@ export default function ProductCard({ product }: ProductCardProps) {
   const displayPrice = getProductPrice(product, defaultSizePreset.id);
 
   return (
-    <div className="group relative flex h-full flex-col gap-4 transition-transform duration-300 hover:-translate-y-1">
-      <Link
-        href={`/product/${product.slug}`}
-        className="relative flex min-h-[290px] items-center justify-center overflow-hidden rounded-[2rem] bg-[#fffdf8] p-6 shadow-[0_18px_42px_rgba(31,23,38,0.08)]"
-      >
-        <div className="absolute right-4 top-4 flex h-8 w-8 items-center justify-center rounded-full bg-white/90 text-primary shadow-sm backdrop-blur-sm transition-colors hover:bg-secondary hover:text-white">
-          <Heart className="h-4 w-4" />
-        </div>
-        <div className="absolute left-4 top-4 rounded-full bg-primary/90 px-3 py-1 text-[10px] font-bold uppercase tracking-widest text-white shadow-sm">
+    <div className="group relative flex flex-col items-center gap-6 rounded-[2rem] bg-white p-4 shadow-sm transition-all duration-500 hover:shadow-xl hover:shadow-primary/5">
+      <div className="relative aspect-[0.76] w-full overflow-hidden rounded-[1.5rem] bg-[#f9f9f9] transition-transform duration-500 group-hover:scale-[1.02]">
+        <Image
+          src={productImage}
+          alt={product.name}
+          fill
+          className="object-cover transition-transform duration-700 group-hover:scale-105"
+          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
+          unoptimized
+        />
+        {/* Category Badge */}
+        <div className="absolute left-4 top-4 rounded-full bg-white/90 px-3 py-1 text-[9px] font-black uppercase tracking-wider text-primary backdrop-blur-sm">
           {product.category.name}
         </div>
-        <div
-          className="relative w-full transition-transform duration-500 group-hover:scale-105"
-          style={{ aspectRatio: String(defaultSizePreset.catalogAspectRatio) }}
-        >
-          <Image
-            src={productImage}
-            alt={product.name}
-            fill
-            className="object-contain"
-            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-            unoptimized
-          />
-        </div>
-      </Link>
-
-      <div className="flex flex-1 flex-col items-center gap-1 px-2 text-center">
-        <Link href={`/product/${product.slug}`} className="font-serif text-[2rem] font-bold leading-tight text-primary hover:underline">
-          {product.name}
-        </Link>
-        <p className="text-sm font-medium text-muted-foreground">{defaultSizePreset.label}</p>
-        <p className="max-w-[18rem] text-sm leading-relaxed text-muted-foreground line-clamp-2">{product.description}</p>
-        <span className="pt-1 font-sans text-2xl font-extrabold text-secondary">₹{displayPrice}</span>
       </div>
 
-      <Link
-        href={`/product/${product.slug}`}
-        className="mt-auto inline-flex items-center justify-center gap-2 self-center rounded-full border border-primary/12 px-5 py-3 text-sm font-bold text-primary transition-all hover:border-secondary/40 hover:bg-secondary/5"
-      >
-        <ShoppingBag className="h-5 w-5" />
-        Personalize
-      </Link>
+      <div className="flex w-full flex-col items-center gap-4 px-2 pb-2">
+        <div className="flex flex-col items-center gap-1 text-center">
+          <Link 
+            href={`/product/${product.slug}`} 
+            className="font-serif text-[20px] font-bold leading-tight tracking-tight text-foreground transition-premium hover:opacity-60"
+          >
+            {product.name}
+          </Link>
+          <p className="text-[14px] font-medium text-foreground/40 italic">
+            From ₹{displayPrice}
+          </p>
+        </div>
+
+        <Link
+          href={`/product/${product.slug}`}
+          className="inline-flex h-12 w-full items-center justify-center rounded-full bg-primary text-white font-black text-[11px] uppercase tracking-[0.2em] shadow-lg shadow-primary/20 transition-all duration-300 hover:scale-[1.05] hover:bg-primary-pressed active:scale-95"
+        >
+          Personalize
+        </Link>
+      </div>
     </div>
   );
 }

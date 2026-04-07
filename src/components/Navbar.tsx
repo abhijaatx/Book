@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import { ShoppingCart, Menu, X, Heart } from "lucide-react";
+import { ShoppingCart, Menu, X, Search, User, Heart } from "lucide-react";
 import { useCart } from "@/store/useCart";
 import CartDrawer from "./CartDrawer";
 
@@ -14,71 +14,91 @@ export default function Navbar() {
   const totalItems = items.reduce((acc, item) => acc + item.quantity, 0);
 
   const navLinks = [
-    { name: "Shop All", href: "/category/all" },
-    { name: "Anniversary", href: "/category/anniversary" },
-    { name: "Birthday", href: "/category/birthday" },
-    { name: "Wedding", href: "/category/wedding" },
-    { name: "Albums", href: "/category/albums" },
-    { name: "Baby", href: "/category/baby-kids" },
+    { name: "NEW IN", href: "/category/new" },
+    { name: "PLANNERS", href: "/category/planners" },
+    { name: "NOTEBOOKS", href: "/category/notebooks" },
+    { name: "PHOTOBOOKS", href: "/category/photobooks" },
+    { name: "STATIONERY", href: "/category/stationery" },
+    { name: "SALE", href: "/category/sale" },
   ];
 
   return (
     <>
-      <nav className="z-50 w-full border-b border-secondary/20 bg-background/80 backdrop-blur-md">
-        <div className="mx-auto flex h-20 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
-          {/* Logo */}
-          <div className="flex flex-1 items-center">
-            <Link href="/" className="group flex items-center gap-2">
-              <Heart className="h-6 w-6 text-primary transition-transform group-hover:scale-110" fill="currentColor" />
-              <span className="font-serif text-2xl font-bold tracking-tight text-primary">Kahaani</span>
+      <nav className="z-50 w-full border-b border-foreground/5 bg-white">
+        {/* Row 1: Search, Logo, Icons */}
+        <div className="mx-auto flex h-20 max-w-[1440px] items-center justify-between px-6 lg:px-12">
+          {/* Search (Left) */}
+          <div className="hidden lg:flex flex-1 items-center">
+            <div className="relative group w-64">
+              <input 
+                type="text" 
+                placeholder="Search..." 
+                className="w-full bg-muted/50 rounded-full py-2.5 pl-10 pr-4 text-[11px] font-bold uppercase tracking-widest text-foreground/40 focus:outline-none focus:ring-1 focus:ring-primary transition-premium"
+              />
+              <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-foreground/20 group-focus-within:text-primary transition-premium" />
+            </div>
+          </div>
+
+          <button 
+            className="lg:hidden h-10 w-10 flex items-center justify-center text-foreground"
+            onClick={() => setIsOpen(!isOpen)}
+          >
+            {isOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+          </button>
+
+          {/* Logo (Center) */}
+          <div className="flex shrink-0 items-center justify-center">
+            <Link href="/" className="group flex items-center">
+              <span className="font-serif text-[32px] leading-none tracking-[-0.04em] lowercase">kahaani</span>
             </Link>
           </div>
 
-          {/* Desktop Links */}
-          <div className="hidden xl:flex xl:items-center xl:gap-8">
+          {/* Icons (Right) */}
+          <div className="flex flex-1 items-center justify-end gap-6 text-foreground">
+            <Link href="/account" className="hidden lg:block hover:text-primary transition-premium">
+              <User size={20} strokeWidth={1.5} />
+            </Link>
+            <Link href="/wishlist" className="hidden lg:block hover:text-primary transition-premium">
+              <Heart size={20} strokeWidth={1.5} />
+            </Link>
+            <button 
+              onClick={() => setIsCartOpen(true)}
+              className="relative hover:text-primary transition-premium"
+            >
+              <ShoppingCart size={20} strokeWidth={1.5} />
+              {totalItems > 0 && (
+                <span className="absolute -right-2 -top-2 flex h-4 w-4 items-center justify-center rounded-full bg-primary text-[9px] font-black text-foreground">
+                  {totalItems}
+                </span>
+              )}
+            </button>
+          </div>
+        </div>
+
+        {/* Row 2: Centered Links */}
+        <div className="hidden lg:flex h-12 w-full items-center justify-center border-t border-foreground/5 bg-white">
+          <div className="flex gap-10">
             {navLinks.map((link) => (
               <Link
                 key={link.name}
                 href={link.href}
-                className="text-sm font-medium text-foreground transition-colors hover:text-secondary"
+                className="text-[10px] font-black text-foreground/80 hover:text-primary transition-premium uppercase tracking-[0.2em]"
               >
                 {link.name}
               </Link>
             ))}
           </div>
-
-          {/* Icons */}
-          <div className="flex flex-1 items-center justify-end gap-5">
-            <button 
-              onClick={() => setIsCartOpen(true)}
-              className="relative text-foreground hover:text-secondary transition-colors"
-            >
-              <ShoppingCart className="h-6 w-6" />
-              {totalItems > 0 && (
-                <span className="absolute -right-2 -top-2 flex h-4 w-4 items-center justify-center rounded-full bg-secondary text-[10px] font-bold text-white">
-                  {totalItems}
-                </span>
-              )}
-            </button>
-            
-            <button 
-              className="xl:hidden text-foreground"
-              onClick={() => setIsOpen(!isOpen)}
-            >
-              {isOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
-            </button>
-          </div>
         </div>
 
         {/* Mobile Menu */}
         {isOpen && (
-          <div className="xl:hidden border-t border-secondary/10 bg-background px-4 py-6 shadow-xl">
-            <div className="flex flex-col gap-4">
+          <div className="lg:hidden border-t border-foreground/5 bg-white px-6 py-10 animate-in slide-in-from-top duration-300">
+            <div className="flex flex-col gap-6">
               {navLinks.map((link) => (
                 <Link
                   key={link.name}
                   href={link.href}
-                  className="text-lg font-medium text-foreground"
+                  className="text-sm font-black text-foreground uppercase tracking-[0.2em]"
                   onClick={() => setIsOpen(false)}
                 >
                   {link.name}

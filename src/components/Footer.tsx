@@ -1,88 +1,76 @@
 import Link from "next/link";
-import { Heart, Phone, Mail, MapPin } from "lucide-react";
+import { Globe, Heart, Send, Mail } from "lucide-react";
 
 export default function Footer() {
-  const shopLinks = [
-    { name: "Anniversary Books", href: "/category/anniversary" },
-    { name: "Birthday Books", href: "/category/birthday" },
-    { name: "Wedding Books", href: "/category/wedding" },
-    { name: "Baby Shower Gifts", href: "/category/baby" },
-    { name: "Custom Albums", href: "/category/albums" },
-  ];
-
-  const supportLinks = [
-    { name: "Order Status", href: "/order-status" },
-    { name: "Shipping Policy", href: "/policies/shipping" },
-    { name: "Refund Policy", href: "/policies/refund" },
-    { name: "FAQs", href: "/faq" },
-    { name: "Contact Us", href: "/contact" },
+  const footerLinks = [
+    { title: "SHOP", links: [
+      { name: "New In", href: "/category/new" },
+      { name: "Planners", href: "/category/planners" },
+      { name: "Notebooks", href: "/category/notebooks" },
+      { name: "Photobooks", href: "/category/photobooks" },
+      { name: "Sale", href: "/category/sale" },
+    ]},
+    { title: "ABOUT", links: [
+      { name: "Our Story", href: "/about" },
+      { name: "Sustainability", href: "/sustainability" },
+      { name: "Careers", href: "/careers" },
+      { name: "Contact Us", href: "/contact" },
+    ]},
+    { title: "HELP", links: [
+      { name: "FAQs", href: "/faq" },
+      { name: "Track Order", href: "/track" },
+      { name: "Shipping & Returns", href: "/policies/shipping" },
+      { name: "Privacy Policy", href: "/policies/privacy" },
+    ]}
   ];
 
   return (
-    <footer className="w-full bg-[#322030] text-white pt-16 pb-8">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12">
-          {/* Brand Info */}
-          <div className="flex flex-col gap-6">
-            <Link href="/" className="flex items-center gap-2 group">
-              <Heart className="h-6 w-6 text-secondary transition-transform group-hover:scale-110" fill="currentColor" />
-              <span className="font-serif text-3xl font-bold tracking-tight">Kahaani</span>
-            </Link>
-            <p className="text-[#D8B4E2] text-sm leading-relaxed">
-              We help you tell your most beautiful stories. Premium handcrafted personalized books and albums for your most cherished moments in India.
-            </p>
-            <div className="flex gap-4">
-              <span className="text-sm font-medium opacity-50 uppercase tracking-widest">Connect with us</span>
-            </div>
+    <footer className="w-full bg-primary text-white pt-20 pb-12">
+      <div className="mx-auto max-w-[1440px] px-6 lg:px-12">
+        <div className="flex flex-col items-center text-center gap-8 mb-16">
+          <div className="flex flex-col gap-3">
+            <span className="font-serif text-[48px] leading-none tracking-[-0.04em] lowercase">kahaani</span>
+            <p className="text-[12px] font-bold uppercase tracking-[0.2em] opacity-60 text-white/60">Stationery & gifts for everyday magic</p>
           </div>
-
-          {/* Shop Links */}
-          <div className="flex flex-col gap-4">
-            <h3 className="font-serif text-xl font-bold">Shop by Occasion</h3>
-            <ul className="flex flex-col gap-2">
-              {shopLinks.map((link) => (
-                <li key={link.name}>
-                  <Link href={link.href} className="text-sm text-[#D8B4E2] hover:text-white transition-colors">
-                    {link.name}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          {/* Support Links */}
-          <div className="flex flex-col gap-4">
-            <h3 className="font-serif text-xl font-bold">Support</h3>
-            <ul className="flex flex-col gap-2">
-              {supportLinks.map((link) => (
-                <li key={link.name}>
-                  <Link href={link.href} className="text-sm text-[#D8B4E2] hover:text-white transition-colors">
-                    {link.name}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          {/* Contact */}
-          <div className="flex flex-col gap-4">
-            <h3 className="font-serif text-xl font-bold">Get in Touch</h3>
-            <div className="flex flex-col gap-3 text-sm text-[#D8B4E2]">
-              <div className="flex items-center gap-2">
-                <Phone className="h-4 w-4" /> <span>+91 91234 56789</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <Mail className="h-4 w-4" /> <span>care@kahaanibooks.com</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <MapPin className="h-4 w-4" /> <span>New Delhi, India</span>
-              </div>
-            </div>
+          
+          <div className="flex gap-4">
+            {[Globe, Heart, Send, Mail].map((Icon, i) => (
+              <a 
+                key={i} 
+                href="#" 
+                className="h-8 w-8 flex items-center justify-center rounded-full bg-white text-primary hover:scale-110 transition-premium"
+              >
+                <Icon size={14} strokeWidth={2.5} />
+              </a>
+            ))}
           </div>
         </div>
 
-        <div className="mt-16 pt-8 border-t border-[#D8B4E2]/20 text-center text-[10px] text-[#D8B4E2]/60 uppercase tracking-widest">
-          © 2026 Kahaani Books India. Handcrafted with Love.
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-12 border-t border-white/10 pt-16">
+          {footerLinks.map((section) => (
+            <div key={section.title} className="flex flex-col gap-6">
+              <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-white/40">{section.title}</h3>
+              <ul className="flex flex-col gap-3">
+                {section.links.map((link) => (
+                  <li key={link.name}>
+                    <Link href={link.href} className="text-[12px] font-bold uppercase tracking-widest text-white hover:text-white/60 transition-premium">
+                      {link.name}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))}
+        </div>
+
+        <div className="mt-20 flex flex-col md:flex-row justify-between items-center gap-6 text-[9px] font-black uppercase tracking-[0.3em] text-white/30">
+          <p>© 2026 Kahaani India. All rights reserved.</p>
+          <div className="flex gap-6">
+            <span>Visa</span>
+            <span>Mastercard</span>
+            <span>UPI</span>
+            <span>GPay</span>
+          </div>
         </div>
       </div>
     </footer>

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, use } from "react";
+import { useState, use, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ArrowLeft, ArrowRight, Sparkles, CheckCircle2, Heart } from "lucide-react";
 import Image from "next/image";
@@ -102,6 +102,14 @@ export default function PersonalizationWizard({
     router.push("/cart");
   };
 
+  const onUpdateHandler = useCallback((photos: string[], layout: any) => {
+    setFormData((prev) => ({ 
+      ...prev, 
+      photos, 
+      layout 
+    }));
+  }, []);
+
   if (currentStep === 3) {
     return (
       <div className="flex h-full min-h-0 flex-col overflow-hidden bg-[#f3f1ee]">
@@ -112,10 +120,7 @@ export default function PersonalizationWizard({
           sizePreset={selectedSizePreset}
           onBack={prevStep}
           onContinue={nextStep}
-          onUpdate={(photos, layout) => {
-            updateFormData("photos", photos);
-            updateFormData("layout", layout);
-          }}
+          onUpdate={onUpdateHandler}
         />
       </div>
     );

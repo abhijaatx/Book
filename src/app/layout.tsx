@@ -1,19 +1,25 @@
 import type { Metadata } from "next";
-import { Inter, Playfair_Display } from "next/font/google";
+import { Playfair_Display, Plus_Jakarta_Sans } from "next/font/google";
 import "./globals.css";
 import AppShell from "@/components/AppShell";
 
-const inter = Inter({ subsets: ["latin"], variable: "--font-sans" });
-const playfair = Playfair_Display({ subsets: ["latin"], variable: "--font-serif" });
+const playfair = Playfair_Display({
+  subsets: ["latin"],
+  variable: "--font-playfair",
+});
+
+const jakarta = Plus_Jakarta_Sans({ 
+  subsets: ["latin"], 
+  variable: "--font-plus-jakarta" 
+});
 
 export const metadata: Metadata = {
-  title: "Kahaani Books | Premium Personalized Storybooks & Albums In India",
-  description: "Handcrafted personalized books and custom albums for anniversaries, birthdays, weddings and more. The perfect gift for your most cherished moments.",
+  title: "Kahaani — Designed for Everyday Magic",
+  description: "Personalized planners, notebooks, and storybooks to manifest your dreams.",
   openGraph: {
-    title: "Kahaani Books | Personalized Gifting",
-    description: "Premium handcrafted personalized books for your most cherished moments.",
-    url: "https://kahaanibooks.com",
-    siteName: "Kahaani Books",
+    title: "Kahaani | Personalized Gifting",
+    description: "Handcrafted personalized stationery and books.",
+    images: ["/og-image.png"],
   },
 };
 
@@ -23,8 +29,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="antialiased scroll-smooth">
-      <body className={`${inter.variable} ${playfair.variable} min-h-screen flex flex-col font-sans bg-background selection:bg-secondary/30`}>
+    <html lang="en" className="scroll-smooth">
+      <body className={`${playfair.variable} ${jakarta.variable} font-sans antialiased bg-background text-foreground`}>
         <AppShell>{children}</AppShell>
       </body>
     </html>

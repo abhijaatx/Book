@@ -1,72 +1,43 @@
 import Link from "next/link";
 import Image from "next/image";
 import { ArrowRight } from "lucide-react";
-import { getCatalogStats } from "@/lib/products";
 
 export default function Hero() {
-  const stats = getCatalogStats();
-
   return (
-    <section className="relative w-full overflow-hidden bg-muted py-20 lg:py-32">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
-          {/* Text Content */}
-          <div className="flex flex-col gap-8 text-center lg:text-left">
-            <div className="flex flex-col gap-4">
-              <span className="text-secondary font-bold uppercase tracking-widest text-xs">Premium Personalized Gifting</span>
-              <h1 className="font-serif text-5xl lg:text-7xl font-bold leading-tight text-primary">
-                Your Most Beautiful Stories, <br />
-                <span className="text-secondary italic">Handcrafted</span>.
+    <section className="relative w-full overflow-hidden bg-background">
+      <div className="flex flex-col lg:flex-row min-h-[700px]">
+        {/* Left: Lifestyle Image */}
+        <div className="relative w-full lg:w-[55%] h-[400px] lg:h-auto overflow-hidden">
+          <Image
+            src="https://images.unsplash.com/photo-1516962080544-eac695c93791?q=80&w=2000&auto=format&fit=crop"
+            alt="Kahaani Lifestyle"
+            fill
+            className="object-cover"
+            priority
+          />
+        </div>
+
+        {/* Right: Content Box */}
+        <div className="flex flex-1 items-center justify-center bg-primary p-8 lg:p-20">
+          <div className="max-w-[500px] flex flex-col gap-10 items-center text-center lg:items-start lg:text-left">
+            <div className="flex flex-col gap-6">
+              <h1 className="font-serif text-[56px] lg:text-[72px] leading-[1] tracking-[-0.04em] text-foreground lowercase">
+                make every <br />
+                moment <br />
+                magic
               </h1>
-              <p className="text-lg text-muted-foreground max-w-xl leading-relaxed">
-                Transform your cherished memories into timeless storybooks and luxury photo albums. Explore {stats.totalProducts}+ customizable designs across {stats.totalCategories} curated gifting collections.
+              <p className="text-[14px] lg:text-[16px] font-bold uppercase tracking-[0.2em] text-foreground/60 leading-relaxed max-w-[400px]">
+                Personalized planners, notebooks & photobooks designed for your biggest dreams.
               </p>
             </div>
             
-            <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
-              <Link 
-                href="/category/anniversary" 
-                className="inline-flex h-14 items-center justify-center gap-2 rounded-xl bg-primary px-8 text-white font-bold transition-all hover:bg-primary/90 hover:scale-[1.02] active:scale-[0.98] shadow-lg shadow-primary/20"
-              >
-                Create Your Book
-                <ArrowRight className="h-5 w-5" />
-              </Link>
-              <Link 
-                href="/category/all" 
-                className="inline-flex h-14 items-center justify-center rounded-xl border-2 border-primary/20 px-8 text-primary font-bold transition-all hover:bg-primary/5"
-              >
-                Browse 200+ Designs
-              </Link>
-            </div>
-
-            <div className="flex items-center gap-6 justify-center lg:justify-start text-sm text-muted-foreground pt-4">
-              <div className="flex -space-x-2">
-                {[1,2,3,4].map(i => (
-                  <div key={i} className="h-8 w-8 rounded-full bg-secondary border-2 border-white flex items-center justify-center text-[10px] text-white">❤️</div>
-                ))}
-              </div>
-              <span>Trusted by 10,000+ happy couples across India</span>
-            </div>
-          </div>
-
-          {/* Visual Content */}
-          <div className="relative aspect-square lg:aspect-[4/5] w-full max-w-lg mx-auto">
-            <div className="absolute inset-0 bg-secondary/10 rounded-3xl -rotate-3 transition-transform hover:rotate-0 duration-500"></div>
-            <div className="relative h-full w-full rounded-3xl overflow-hidden shadow-2xl shadow-primary/30 rotate-2 transition-transform hover:rotate-0 duration-500 border-8 border-white">
-              <Image
-                src="/images/anniversary-book.png"
-                alt="Personalized Anniversary Storybook"
-                fill
-                className="object-cover"
-                priority
-                sizes="(max-width: 1024px) 100vw, 50vw"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent"></div>
-              <div className="absolute bottom-8 left-8 text-white">
-                <p className="font-serif text-2xl font-bold">"The Anniversary Collection"</p>
-                <p className="text-sm font-medium opacity-90">Personalize with your own story & photos</p>
-              </div>
-            </div>
+            <Link 
+              href="/category/planners" 
+              className="group inline-flex h-16 items-center justify-center gap-4 rounded-full bg-foreground px-12 text-background font-black text-xs uppercase tracking-[0.2em] transition-premium hover:scale-105 active:scale-95"
+            >
+              SHOP NOW
+              <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+            </Link>
           </div>
         </div>
       </div>

@@ -1,44 +1,46 @@
 @import "tailwindcss";
 
 :root {
-  --background: #FDFCF0; /* Ivory */
-  --foreground: #4A154B; /* Deep Plum */
-  --primary: #4A154B;
-  --primary-foreground: #FDFCF0;
-  --secondary: #D8A7B1; /* Muted Rose */
-  --secondary-foreground: #4A154B;
-  --accent: #B8860B; /* Antique Gold */
-  --accent-foreground: #FDFCF0;
-  --muted: #FFF9F0; /* Soft Cream */
-  --muted-foreground: #6B4E71;
-  --card: #FFFFFF;
-  --card-foreground: #4A154B;
-  --border: #E5E5E5;
-  --input: #E5E5E5;
-  --ring: #D8A7B1;
-  --radius: 0.75rem;
+  --background: #FFFDF5; /* Neutral: Warm Cream */
+  --foreground: #1A1A1A; /* Dark Grey for text */
+  --primary: #8B0000; /* Primary: Crimson Red */
+  --primary-pressed: #5D0000; /* Darker Crimson */
+  --secondary: #F4C2C2; /* Secondary: Baby Pink */
+  --tertiary: #D4AF37; /* Tertiary: Gold */
+  --accent: #D4AF37; /* Accent: Gold */
+  --muted: #F9F3E4; /* Soft Muted Cream */
+  --border: #F4C2C2; /* Secondary Pink for borders */
+  --radius: 0.5rem;
+  
+  --font-serif: var(--font-playfair);
+  --font-sans: var(--font-plus-jakarta);
+
+  /* Kahaani Crimson Tokens */
+  --kc-crimson: #8B0000;
+  --kc-gold: #D4AF37;
+  --kc-pink: #F4C2C2;
+  --kc-cream: #FFFDF5;
+  
+  --transition-premium: 0.3s cubic-bezier(0.215, 0.61, 0.355, 1);
 }
 
-@theme inline {
-  --color-background: var(--background);
+@theme {
+  --color-primary: var(--kc-crimson);
+  --color-primary-pressed: var(--primary-pressed);
+  --color-secondary: var(--kc-pink);
+  --color-tertiary: var(--kc-gold);
+  --color-background: var(--kc-cream);
   --color-foreground: var(--foreground);
-  --color-primary: var(--primary);
-  --color-primary-foreground: var(--primary-foreground);
-  --color-secondary: var(--secondary);
-  --color-secondary-foreground: var(--secondary-foreground);
-  --color-accent: var(--accent);
-  --color-accent-foreground: var(--accent-foreground);
-  --color-muted: var(--muted);
-  --color-muted-foreground: var(--muted-foreground);
-  --color-card: var(--card);
-  --color-card-foreground: var(--card-foreground);
+  --color-accent: var(--kc-gold);
   --color-border: var(--border);
-  --color-input: var(--input);
-  --color-ring: var(--ring);
-  --radius-xl: var(--radius);
+  --font-serif: var(--font-serif);
+  --font-sans: var(--font-sans);
+  --radius-xl: 1rem;
+  --radius-2xl: 2rem;
+  --radius-3xl: 3rem;
   
-  --font-serif: "Playfair Display", serif;
-  --font-sans: "Inter", sans-serif;
+  --font-sans: var(--font-jakarta), "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-serif: var(--font-jakarta), "Plus Jakarta Sans", serif;
 }
 
 body {
@@ -49,4 +51,41 @@ body {
 
 h1, h2, h3, h4, h5, h6 {
   font-family: var(--font-serif);
+}
+
+/* Mobile Component Animations */
+@keyframes slideUp {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}
+
+@keyframes slideLeft {
+  from { transform: translateX(100%); }
+  to { transform: translateX(0); }
+}
+
+@keyframes slideRight {
+  from { transform: translateX(-100%); }
+  to { transform: translateX(0); }
+}
+
+.animate-slide-up {
+  animation: slideUp 0.4s cubic-bezier(0.215, 0.61, 0.355, 1) forwards;
+}
+
+.animate-slide-left {
+  animation: slideLeft 0.4s cubic-bezier(0.215, 0.61, 0.355, 1) forwards;
+}
+
+.animate-slide-right {
+  animation: slideRight 0.4s cubic-bezier(0.215, 0.61, 0.355, 1) forwards;
+}
+
+/* Scrollbar Hiding */
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }

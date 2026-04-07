@@ -1,6 +1,16 @@
 import { getProductBySlug } from "@/lib/products";
 import { notFound } from "next/navigation";
 import ProductDetails from "@/components/ProductDetails";
+import { Metadata } from "next";
+
+export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
+  const { slug } = await params;
+  const product = getProductBySlug(slug);
+  return {
+    title: product ? `${product.name} — Kahaani` : "Product — Kahaani",
+    description: product?.description,
+  };
+}
 
 export default async function ProductDetailPage({ 
   params 
@@ -28,6 +38,7 @@ export default async function ProductDetailPage({
               <span className="text-secondary font-bold uppercase tracking-widest text-xs">
                 {product.type === 'album' ? 'A Handcrafted Heirloom' : 'A Handcrafted Storybook'}
               </span>
+              <p>Handcrafted in India with premium archival-safe materials and finished with the signature Kahaani aesthetic, these are more than just products—they're keepsakes built for a lifetime of magic.</p>
               <h2 className="font-serif text-4xl font-bold text-primary">
                 {product.type === 'album' ? 'Preserve your legacy.' : 'Capture your magic journey.'}
               </h2>
