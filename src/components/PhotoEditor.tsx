@@ -1,11 +1,13 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
+import Link from "next/link";
 import type { SizePreset } from "@/lib/products";
 import {
   ChevronDown,
   ChevronLeft,
   ChevronRight,
+  ChevronUp,
   Image as ImageIcon,
   LayoutGrid,
   Palette,
@@ -20,6 +22,8 @@ import {
   Undo2,
   Upload,
   X,
+  ZoomIn,
+  ZoomOut,
 } from "lucide-react";
 
 type ActivePanel = "images" | "text" | "layouts" | "backgrounds";
@@ -690,25 +694,26 @@ function createPage(label: string, layoutId: string, kind: PageData["kind"] = "p
 }
 
 function createInitialPages() {
+  const layouts = [
+    "single-caption", "two-side-caption", "portrait-right-caption", "single-caption",
+    "two-side-caption", "wide-caption", "single-caption", "four-grid-caption",
+    "single-caption", "two-side-caption", "three-mix-caption", "single-caption",
+    "portrait-right-caption", "two-side-caption", "single-caption", "hero-two-small-caption",
+    "single-caption", "two-side-caption", "square-caption", "single-caption",
+    "two-stacked-caption", "single-caption", "three-columns-caption", "single-caption",
+  ];
   return [
     createPage("Back Cover", "blank-text", "back-cover"),
     createPage("Front Cover", "front-cover-square", "front-cover"),
-    createPage("Page 1", "single-caption"),
-    createPage("Page 2", "single-caption"),
-    createPage("Page 3", "portrait-right-caption"),
-    createPage("Page 4", "two-side-caption"),
-    createPage("Page 5", "single-caption"),
-    createPage("Page 6", "two-side-caption"),
-    createPage("Page 7", "wide-caption"),
-    createPage("Page 8", "single-caption"),
+    ...layouts.map((layoutId, i) => createPage(`Page ${i + 1}`, layoutId)),
   ];
 }
 
 function getEditorMetrics(sizePreset: SizePreset, visiblePageCount: number, isMobile: boolean = false) {
-  const baseHeight = isMobile ? 320 : 400; // Consistent height regardless of page count
+  const baseHeight = isMobile ? 320 : 750;
   const pageHeight = Math.round(baseHeight * sizePreset.editorScale);
   const pageWidth = Math.round(pageHeight * sizePreset.pageAspectRatio);
-  const thumbnailHeight = Math.max(48, Math.round(58 * sizePreset.editorScale));
+  const thumbnailHeight = Math.max(62, Math.round(62 * sizePreset.editorScale));
   const thumbnailWidth = Math.round(thumbnailHeight * sizePreset.pageAspectRatio);
 
   return {
@@ -720,27 +725,12 @@ function getEditorMetrics(sizePreset: SizePreset, visiblePageCount: number, isMo
 }
 
 function buildViewRanges(pages: PageData[], isMobile: boolean = false) {
-  if (isMobile) {
-    return pages.map((page, index) => ({
-      id: page.id,
-      label: page.label,
-      pageIndices: [index],
-    }));
-  }
-
-  if (pages.length < 3) {
-    return [{ id: "covers", label: "Covers", pageIndices: [0, 1] }];
-  }
-
-  const ranges = [{ id: "covers", label: "Covers", pageIndices: [0, 1] }, { id: pages[2].id, label: pages[2].label, pageIndices: [2] }];
-  for (let index = 3; index < pages.length; index += 2) {
-    ranges.push({
-      id: `spread-${index}`,
-      label: `${pages[index].label}${pages[index + 1] ? ` / ${pages[index + 1].label}` : ""}`,
-      pageIndices: [index, index + 1].filter((pageIndex) => pageIndex < pages.length),
-    });
-  }
-  return ranges;
+  // Always return single-page ranges for both mobile and desktop as requested
+  return pages.map((page, index) => ({
+    id: page.id,
+    label: page.label,
+    pageIndices: [index],
+  }));
 }
 
 function pageScaleFilter(filter: ImageFilter) {
@@ -812,6 +802,7 @@ function PageCanvas({
   onSelectSlot,
   onSelectCaption,
   onDropOnSlot,
+  onFilesDropped,
 }: {
   page: PageData;
   coverTitle: string;
@@ -820,6 +811,7 @@ function PageCanvas({
   onSelectSlot: (slotId: string) => void;
   onSelectCaption: (slotId: string) => void;
   onDropOnSlot: (slotId: string, url: string) => void;
+  onFilesDropped: (files: File[]) => void;
 }) {
   const layout = LAYOUTS.find((item) => item.id === page.layoutId) ?? LAYOUTS[0];
   const isLandscape = sizePreset.pageAspectRatio > 1.05;
@@ -880,6 +872,11 @@ function PageCanvas({
                 const url = event.dataTransfer.getData("photo-url");
                 if (url) {
                   onDropOnSlot(slot.id, url);
+                } else if (event.dataTransfer.files?.length > 0) {
+                  const files = Array.from(event.dataTransfer.files);
+                  const newUrl = URL.createObjectURL(files[0]);
+                  onDropOnSlot(slot.id, newUrl);
+                  onFilesDropped(files);
                 }
               }}
             >
@@ -1028,6 +1025,45 @@ export default function PhotoEditor({
     };
   }, [cropDrag]);
 
+  // Arrow key support for moving photos within slots
+  useEffect(() => {
+    function handleKeyDown(event: KeyboardEvent) {
+      if (!selectedTarget || selectedTarget.type !== "slot") return;
+      const page = pages.find((p) => p.id === selectedTarget.pageId);
+      if (!page?.slots[selectedTarget.slotId]?.url) return;
+
+      const step = 5;
+      let dx = 0;
+      let dy = 0;
+      if (event.key === "ArrowLeft") dx = step;
+      else if (event.key === "ArrowRight") dx = -step;
+      else if (event.key === "ArrowUp") dy = step;
+      else if (event.key === "ArrowDown") dy = -step;
+      else return;
+
+      event.preventDefault();
+      setPages((cur) =>
+        cur.map((p) =>
+          p.id !== selectedTarget.pageId
+            ? p
+            : {
+                ...p,
+                slots: {
+                  ...p.slots,
+                  [selectedTarget.slotId]: {
+                    ...p.slots[selectedTarget.slotId],
+                    offsetX: Math.max(-60, Math.min(60, p.slots[selectedTarget.slotId].offsetX + dx)),
+                    offsetY: Math.max(-60, Math.min(60, p.slots[selectedTarget.slotId].offsetY + dy)),
+                  },
+                },
+              },
+        ),
+      );
+    }
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [selectedTarget, pages]);
+
   function snapshot(): EditorSnapshot {
     return {
       uploadedPhotos: clone(uploadedPhotos),
@@ -1132,6 +1168,16 @@ export default function PhotoEditor({
       return;
     }
 
+    const usedUrls = new Set<string>();
+    pages.forEach((page) => {
+      Object.values(page.slots || {}).forEach((slot) => {
+        if (slot.url) usedUrls.add(slot.url);
+      });
+    });
+
+    const unusedPhotos = uploadedPhotos.filter((url) => !usedUrls.has(url));
+    if (unusedPhotos.length === 0) return;
+
     pushHistory();
     let photoIndex = 0;
     setPages((currentPages) =>
@@ -1141,8 +1187,8 @@ export default function PhotoEditor({
         }
         const nextSlots = { ...page.slots };
         Object.keys(nextSlots).forEach((slotId) => {
-          if (!nextSlots[slotId].url && uploadedPhotos[photoIndex]) {
-            nextSlots[slotId] = { ...nextSlots[slotId], url: uploadedPhotos[photoIndex] };
+          if (!nextSlots[slotId].url && unusedPhotos[photoIndex]) {
+            nextSlots[slotId] = { ...nextSlots[slotId], url: unusedPhotos[photoIndex] };
             photoIndex += 1;
           }
         });
@@ -1243,13 +1289,59 @@ export default function PhotoEditor({
 
   return (
     <div className="flex h-full min-h-0 flex-col overflow-hidden bg-secondary/20">
-      <div className="flex h-20 items-center justify-between border-b border-border/50 bg-white px-8">
-        <div className="min-w-[160px] text-[24px] font-black uppercase tracking-tighter text-foreground">Kahaani</div>
+      <header className="flex h-14 shrink-0 items-center justify-between border-b border-border/10 bg-white px-6">
+        <Link href="/" className="min-w-[120px] font-serif text-[28px] leading-none tracking-tight hover:opacity-80 transition-opacity text-foreground">
+          कहानी
+        </Link>
         <div className="text-center">
-          <p className="text-xs font-black uppercase tracking-[0.2em] text-foreground/40">{projectName}</p>
+          <p className="text-[10px] font-black uppercase tracking-[0.2em] text-foreground/40">{projectName}</p>
         </div>
-        <div className="flex min-w-[250px] items-center justify-end gap-6">
-          <div className="hidden items-center gap-4 text-[10px] font-black uppercase tracking-widest text-foreground/30 md:flex">
+        <div className="flex min-w-[400px] items-center justify-end gap-6 text-[10px] font-black uppercase tracking-widest">
+          {/* Controls - Merged into Header for maximum real estate */}
+          <div className="hidden items-center gap-3 border-r border-border/10 pr-6 text-[#9a9a9a] md:flex">
+            <button
+              type="button"
+              className="hover:text-primary transition-colors"
+              onClick={() => {
+                const previous = undoStack[undoStack.length - 1];
+                if (!previous) return;
+                setUndoStack((current) => current.slice(0, -1));
+                setRedoStack((current) => [...current, snapshot()]);
+                restoreSnapshot(previous);
+              }}
+            >
+              <Undo2 className="h-4 w-4" />
+            </button>
+            <button
+              type="button"
+              className="hover:text-primary transition-colors pr-3"
+              onClick={() => {
+                const next = redoStack[redoStack.length - 1];
+                if (!next) return;
+                setRedoStack((current) => current.slice(0, -1));
+                setUndoStack((current) => [...current, snapshot()]);
+                restoreSnapshot(next);
+              }}
+            >
+              <Redo2 className="h-4 w-4" />
+            </button>
+            
+            <div className="flex items-center gap-3 border-l border-border/10 pl-6">
+              <button type="button" onClick={() => setZoom((current) => Math.max(0.7, current - 0.1))}>-</button>
+              <input
+                type="range"
+                min="0.7"
+                max="1.3"
+                step="0.05"
+                value={zoom}
+                onChange={(event) => setZoom(Number(event.target.value))}
+                className="w-16 accent-[#bbb]"
+              />
+              <button type="button" onClick={() => setZoom((current) => Math.min(1.3, current + 0.1))}>+</button>
+            </div>
+          </div>
+
+          <div className="hidden items-center gap-4 text-foreground/30 lg:flex">
             <span className="text-primary animate-pulse">●</span>
             <span>Cloud Saved</span>
             <Save className="h-4 w-4" />
@@ -1257,22 +1349,21 @@ export default function PhotoEditor({
           <button
             type="button"
             onClick={onContinue}
-            className="inline-flex h-12 items-center gap-3 rounded-full bg-primary-pressed px-8 text-[11px] font-black uppercase tracking-[0.2em] text-white shadow-xl shadow-primary-pressed/20 transition-all hover:scale-105 active:scale-95"
+            className="inline-flex h-10 items-center gap-3 rounded-full bg-primary-pressed px-6 text-white shadow-xl shadow-primary-pressed/20 transition-all hover:scale-105 active:scale-95"
           >
             <ShoppingCart className="h-4 w-4" />
             Checkout
-            <ChevronRight className="h-4 w-4" />
           </button>
-          <button type="button" onClick={onBack} className="text-foreground/40 hover:text-primary transition-colors">
-            <X className="h-6 w-6" />
+          <button type="button" onClick={onBack} className="text-foreground/30 hover:text-primary transition-colors">
+            <X className="h-5 w-5" />
           </button>
         </div>
-      </div>
+      </header>
 
-      <div className="relative flex min-h-0 flex-1 flex-col md:grid md:grid-cols-[280px_1fr_300px]">
+      <div className="relative flex min-h-0 flex-1 flex-col md:grid md:grid-cols-[260px_1fr_300px] md:grid-rows-[1fr] md:h-full md:overflow-hidden">
         {/* Left Sidebar - Library */}
         <aside
-          className={`absolute inset-y-0 left-0 z-50 w-[280px] border-r border-border/50 bg-white shadow-2xl transition-transform duration-300 md:relative md:z-0 md:w-full md:translate-x-0 md:shadow-none ${activeMobilePanel === "library" ? "translate-x-0" : "-translate-x-full"}`}
+          className={`absolute inset-y-0 left-0 z-50 w-[260px] flex flex-col overflow-hidden border-r border-border/10 bg-white shadow-2xl transition-transform duration-300 md:relative md:z-0 md:w-full md:translate-x-0 md:shadow-none ${activeMobilePanel === "library" ? "translate-x-0" : "-translate-x-full"}`}
           onDragOver={(event) => event.preventDefault()}
           onDrop={(event) => {
             event.preventDefault();
@@ -1281,21 +1372,31 @@ export default function PhotoEditor({
             }
           }}
         >
-          <div className="flex items-center justify-between border-b border-border/50 px-5 py-6">
-            <div className="text-[10px] font-black uppercase tracking-[0.3em] text-foreground/30">Library</div>
+          <div className="flex items-center justify-between border-b border-border/10 px-5 py-3">
+            <div className="flex items-center gap-4">
+              <div className="text-[10px] font-black uppercase tracking-[0.3em] text-foreground/30">Library</div>
+              <div className="flex items-center gap-2 border-l border-border/10 pl-4">
+                <button type="button" onClick={addPage} title="Add 2 pages" className="text-primary hover:scale-110 transition-all">
+                  <Plus className="h-4 w-4" strokeWidth={3} />
+                </button>
+                <button type="button" onClick={deleteSelectedPage} title="Delete selected" className="text-foreground/20 hover:text-primary transition-all">
+                  <Trash2 className="h-3.5 w-3.5" strokeWidth={3} />
+                </button>
+              </div>
+            </div>
             <button type="button" onClick={() => setActiveMobilePanel("none")} className="p-2 text-foreground/30 md:hidden">
               <X className="h-4 w-4" />
             </button>
           </div>
-          <div className="min-h-0 flex-1 overflow-y-auto px-6 py-6 scrollbar-hide">
+          <div className="min-h-0 flex-1 overflow-y-auto px-6 py-4 scrollbar-hide">
             {uploadedPhotos.length === 0 ? (
-              <div className="flex h-full min-h-[400px] flex-col items-center justify-center rounded-[2rem] border-2 border-dashed border-border/50 px-8 text-center bg-secondary/10">
-                <Upload className="mb-8 h-12 w-12 text-primary/30" />
-                <p className="max-w-[170px] text-[11px] font-bold uppercase tracking-widest leading-loose text-foreground/30">Drag your memories here to start</p>
+              <div className="flex h-full min-h-[400px] flex-col items-center justify-center rounded-[2rem] border-2 border-dashed border-border/50 px-8 text-center bg-secondary/5">
+                <Upload className="mb-6 h-10 w-10 text-primary/30" />
+                <p className="max-w-[170px] text-[10px] font-black uppercase tracking-widest leading-loose text-foreground/30">Drag your memories here</p>
                 <button
                   type="button"
                   onClick={() => fileInputRef.current?.click()}
-                  className="mt-10 inline-flex h-14 items-center justify-center rounded-full bg-primary-pressed px-10 text-[11px] font-black uppercase tracking-[0.2em] text-white shadow-xl shadow-primary-pressed/20 transition-all hover:scale-105 active:scale-95"
+                  className="mt-8 inline-flex h-12 items-center justify-center rounded-full bg-primary-pressed px-8 text-[11px] font-black uppercase tracking-[0.2em] text-white shadow-xl shadow-primary-pressed/20 transition-all hover:scale-105 active:scale-95"
                 >
                   Upload photos
                 </button>
@@ -1307,18 +1408,6 @@ export default function PhotoEditor({
                     <Sparkles className="h-3 w-3" />
                     Autofill
                   </button>
-                  <div className="flex items-center gap-2">
-                    {[2, 3].map((columns) => (
-                      <button
-                        key={columns}
-                        type="button"
-                        onClick={() => setLibraryColumns(columns as 2 | 3)}
-                        className={`flex h-7 w-7 items-center justify-center rounded-lg transition-all ${libraryColumns === columns ? "bg-primary text-white shadow-lg shadow-primary/20" : "bg-secondary/30 text-foreground/40 hover:bg-secondary/50"}`}
-                      >
-                        {columns === 2 ? "◫" : "▦"}
-                      </button>
-                    ))}
-                  </div>
                 </div>
                 <div className={`grid gap-4 ${libraryColumns === 2 ? "grid-cols-2" : "grid-cols-3"}`}>
                   {uploadedPhotos.map((photo, index) => (
@@ -1345,7 +1434,7 @@ export default function PhotoEditor({
                 <button
                   type="button"
                   onClick={() => fileInputRef.current?.click()}
-                  className="mt-8 inline-flex h-14 items-center justify-center gap-3 rounded-full bg-secondary/30 px-6 text-[11px] font-black uppercase tracking-[0.2em] text-foreground hover:bg-secondary/50 transition-all"
+                  className="mt-6 inline-flex h-12 items-center justify-center gap-3 rounded-full bg-secondary/30 px-6 text-[10px] font-black uppercase tracking-[0.2em] text-foreground hover:bg-secondary/50 transition-all"
                 >
                   <Plus className="h-4 w-4" />
                    Add more
@@ -1368,70 +1457,8 @@ export default function PhotoEditor({
           </div>
         </aside>
 
-        <section className="relative flex min-h-0 flex-1 flex-col">
-          <div className="flex items-center justify-between px-5 py-3 md:py-3">
-            <div className="flex items-center gap-4 text-[#9c9c9c] md:gap-6">
-              <button
-                type="button"
-                className="flex h-10 w-10 items-center justify-center rounded-full bg-secondary/10 hover:bg-secondary/20 transition-all active:scale-90"
-                onClick={() => {
-                  const previous = undoStack[undoStack.length - 1];
-                  if (!previous) return;
-                  setUndoStack((current) => current.slice(0, -1));
-                  setRedoStack((current) => [...current, snapshot()]);
-                  restoreSnapshot(previous);
-                }}
-              >
-                <Undo2 className="h-4 w-4" />
-              </button>
-              <button
-                type="button"
-                className="flex h-10 w-10 items-center justify-center rounded-full bg-secondary/10 hover:bg-secondary/20 transition-all active:scale-90"
-                onClick={() => {
-                  const next = redoStack[redoStack.length - 1];
-                  if (!next) return;
-                  setRedoStack((current) => current.slice(0, -1));
-                  setUndoStack((current) => [...current, snapshot()]);
-                  restoreSnapshot(next);
-                }}
-              >
-                <Redo2 className="h-4 w-4" />
-              </button>
-            </div>
-
-            {/* Desktop Zoom - Hidden on Mobile */}
-            <div className="hidden items-center gap-3 text-[#9a9a9a] md:flex">
-              <button type="button" onClick={() => setZoom((current) => Math.max(0.7, current - 0.1))}>
-                -
-              </button>
-              <input
-                type="range"
-                min="0.7"
-                max="1.3"
-                step="0.05"
-                value={zoom}
-                onChange={(event) => setZoom(Number(event.target.value))}
-                className="w-24 accent-[#bbb]"
-              />
-              <button type="button" onClick={() => setZoom((current) => Math.min(1.3, current + 0.1))}>
-                +
-              </button>
-            </div>
-
-            {/* Mobile Header Actions */}
-            <div className="flex items-center gap-3 md:hidden">
-              <button
-                type="button"
-                onClick={() => setActiveMobilePanel("layouts")}
-                className="flex h-10 items-center gap-2 rounded-full border border-primary/20 bg-primary/5 px-4 text-[10px] font-black uppercase tracking-widest text-primary active:scale-95 transition-all"
-              >
-                <LayoutGrid className="h-3 w-3" />
-                Patterns
-              </button>
-            </div>
-          </div>
-
-          <div className="relative min-h-0 flex-1 overflow-hidden px-4 pb-4 md:px-7">
+        <section className="relative flex min-h-0 flex-1 flex-col overflow-hidden bg-secondary/5">
+          <div className="relative min-h-0 flex-1 overflow-hidden px-2 pt-4 pb-2 md:px-4">
             <button
               type="button"
               disabled={currentView === 0}
@@ -1458,9 +1485,9 @@ export default function PhotoEditor({
               <ChevronRight className="h-10 w-10" />
             </button>
 
-            <div className="flex h-full items-center justify-center overflow-auto">
+            <div className="flex h-full items-center justify-center overflow-auto scrollbar-hide">
               <div
-                className={`flex items-center justify-center ${visiblePages.length === 1 ? "" : "gap-2"} origin-center transition-transform`}
+                className={`flex items-center justify-center origin-center transition-transform`}
                 style={{ transform: `scale(${zoom})` }}
               >
                 {visiblePages.map((page) => {
@@ -1493,59 +1520,48 @@ export default function PhotoEditor({
                             if (window.innerWidth < 768) setActiveMobilePanel("text");
                           }}
                           onDropOnSlot={(slotId, url) => placePhotoOnPage(page.id, slotId, url)}
+                          onFilesDropped={(files) => appendFiles(files)}
                         />
 
                         {selectedTarget?.type === "slot" && selectedTarget.pageId === page.id && page.slots[selectedTarget.slotId]?.url ? (
-                          <div className="absolute left-1/2 top-4 z-20 flex -translate-x-1/2 items-center gap-2 rounded-full bg-white px-3 py-2 shadow-lg">
-                            <button
-                              type="button"
-                              className="text-[11px] text-[#6f6f6f]"
-                              onClick={() =>
-                                updateSelectedSlot((slot) => ({
-                                  ...slot,
-                                  filter: slot.filter === "grayscale" ? "none" : "grayscale",
-                                }))
-                              }
-                            >
+                          <div className="absolute left-1/2 top-4 z-20 flex -translate-x-1/2 items-center gap-1.5 rounded-full bg-white px-3 py-1.5 shadow-lg">
+                            {/* Directional controls */}
+                            <button type="button" className="p-1 text-[#6f6f6f] hover:text-primary transition-colors" title="Move left" onClick={() => updateSelectedSlot((s) => ({ ...s, offsetX: Math.min(60, s.offsetX + 5) }))}>
+                              <ChevronLeft className="h-3.5 w-3.5" />
+                            </button>
+                            <div className="flex flex-col">
+                              <button type="button" className="p-0.5 text-[#6f6f6f] hover:text-primary transition-colors" title="Move up" onClick={() => updateSelectedSlot((s) => ({ ...s, offsetY: Math.min(60, s.offsetY + 5) }))}>
+                                <ChevronUp className="h-3.5 w-3.5" />
+                              </button>
+                              <button type="button" className="p-0.5 text-[#6f6f6f] hover:text-primary transition-colors" title="Move down" onClick={() => updateSelectedSlot((s) => ({ ...s, offsetY: Math.max(-60, s.offsetY - 5) }))}>
+                                <ChevronDown className="h-3.5 w-3.5" />
+                              </button>
+                            </div>
+                            <button type="button" className="p-1 text-[#6f6f6f] hover:text-primary transition-colors" title="Move right" onClick={() => updateSelectedSlot((s) => ({ ...s, offsetX: Math.max(-60, s.offsetX - 5) }))}>
+                              <ChevronRight className="h-3.5 w-3.5" />
+                            </button>
+                            <div className="mx-1 h-5 w-px bg-border/30" />
+                            {/* Zoom */}
+                            <button type="button" className="p-1 text-[#6f6f6f] hover:text-primary transition-colors" title="Zoom in" onClick={() => updateSelectedSlot((s) => ({ ...s, zoom: Math.min(3, s.zoom + 0.1) }))}>
+                              <ZoomIn className="h-3.5 w-3.5" />
+                            </button>
+                            <button type="button" className="p-1 text-[#6f6f6f] hover:text-primary transition-colors" title="Zoom out" onClick={() => updateSelectedSlot((s) => ({ ...s, zoom: Math.max(0.5, s.zoom - 0.1) }))}>
+                              <ZoomOut className="h-3.5 w-3.5" />
+                            </button>
+                            <div className="mx-1 h-5 w-px bg-border/30" />
+                            {/* Filters */}
+                            <button type="button" className="p-1 text-[11px] text-[#6f6f6f] hover:text-primary transition-colors" title="Grayscale" onClick={() => updateSelectedSlot((s) => ({ ...s, filter: s.filter === "grayscale" ? "none" : "grayscale" }))}>
                               ◐
                             </button>
-                            <button
-                              type="button"
-                              className="text-[11px] text-[#6f6f6f]"
-                              onClick={() =>
-                                updateSelectedSlot((slot) => ({
-                                  ...slot,
-                                  filter: slot.filter === "sepia" ? "none" : "sepia",
-                                }))
-                              }
-                            >
+                            <button type="button" className="p-1 text-[11px] text-[#6f6f6f] hover:text-primary transition-colors" title="Sepia" onClick={() => updateSelectedSlot((s) => ({ ...s, filter: s.filter === "sepia" ? "none" : "sepia" }))}>
                               ↻
                             </button>
-                            <button
-                              type="button"
-                              className="text-[11px] text-[#6f6f6f]"
-                              onClick={() =>
-                                updateSelectedSlot((slot) => ({
-                                  ...slot,
-                                  zoom: 1,
-                                  offsetX: 0,
-                                  offsetY: 0,
-                                  filter: "none",
-                                }))
-                              }
-                            >
+                            {/* Reset */}
+                            <button type="button" className="p-1 text-[11px] text-[#6f6f6f] hover:text-primary transition-colors" title="Reset" onClick={() => updateSelectedSlot((s) => ({ ...s, zoom: 1, offsetX: 0, offsetY: 0, filter: "none" }))}>
                               ⇄
                             </button>
-                            <button
-                              type="button"
-                              className="text-[11px] text-[#ff7a6a]"
-                              onClick={() =>
-                                updateSelectedSlot((slot) => ({
-                                  ...slot,
-                                  url: null,
-                                }))
-                              }
-                            >
+                            {/* Delete */}
+                            <button type="button" className="p-1 text-[11px] text-[#ff7a6a] hover:text-red-600 transition-colors" title="Remove photo" onClick={() => updateSelectedSlot((s) => ({ ...s, url: null }))}>
                               🗑
                             </button>
                           </div>
@@ -1584,40 +1600,16 @@ export default function PhotoEditor({
                           ))}
                         </div>
                       </div>
-                      <p className="mt-3 text-[13px] text-[#6e7075]">{page.label}</p>
+                      <p className="mt-1 text-[11px] font-black uppercase tracking-widest text-foreground/40">{page.label}</p>
                     </div>
                   );
                 })}
               </div>
             </div>
-
-            {/* Mobile - Prominent Choose Layout Window Button below canvas */}
-            <div className="mt-8 flex justify-center md:hidden">
-              <button
-                type="button"
-                onClick={() => setActiveMobilePanel("layouts")}
-                className="group flex h-14 items-center gap-4 rounded-full bg-primary px-8 text-[11px] font-black uppercase tracking-[0.2em] text-white shadow-xl shadow-primary/20 transition-all active:scale-95"
-              >
-                <LayoutGrid className="h-4 w-4" />
-                Choose Layout
-              </button>
-            </div>
           </div>
 
-          <div className="border-t border-border/50 bg-white px-8 py-6">
-            <div className="mb-4 flex items-center justify-end gap-5 text-[10px] font-black uppercase tracking-widest text-foreground/40">
-              <span className="inline-flex items-center gap-3 rounded-full bg-white px-6 py-3 shadow-[0_8px_30px_rgb(0,0,0,0.06)] border border-border/20">
-                 <div className="h-2 w-2 rounded-full bg-green-500 animate-pulse"></div>
-                 Manage Pages
-              </span>
-              <button type="button" onClick={addPage} title="Add 2 pages" className="flex h-10 w-10 items-center justify-center rounded-2xl bg-secondary/30 text-primary hover:bg-primary hover:text-white transition-all active:scale-90 shadow-sm">
-                <Plus className="h-5 w-5" strokeWidth={3} />
-              </button>
-              <button type="button" onClick={deleteSelectedPage} className="flex h-10 w-10 items-center justify-center rounded-2xl bg-secondary/30 text-foreground/20 hover:text-primary transition-all active:scale-90 shadow-sm">
-                <Trash2 className="h-4 w-4" strokeWidth={3} />
-              </button>
-            </div>
-            <div className="flex gap-4 overflow-x-auto pb-4 pt-2 scrollbar-hide">
+          <div className="shrink-0 border-t border-border/10 bg-white px-6">
+            <div className="flex gap-4 overflow-x-auto pb-4 pt-4 scrollbar-hide">
               {views.map((range, viewIndex) => (
                 <button
                   key={range.id}
@@ -1647,12 +1639,12 @@ export default function PhotoEditor({
 
         {/* Right Sidebar - Layouts/Text/Edit (Desktop: Fixed, Mobile: Bottom Sheet Window) */}
         <aside
-          className={`fixed inset-x-0 bottom-0 z-[70] h-[75vh] w-full overflow-hidden bg-white shadow-[0_-20px_50px_rgba(0,0,0,0.15)] transition-transform duration-500 ease-out rounded-t-[3rem] md:relative md:inset-y-0 md:right-0 md:h-full md:w-[300px] md:rounded-none md:shadow-none md:flex md:flex-row md:border-l md:border-border/50 md:z-0 md:translate-x-0 ${
+          className={`fixed inset-x-0 bottom-0 z-[70] h-[75vh] w-full overflow-hidden bg-white shadow-[0_-20px_50px_rgba(0,0,0,0.15)] transition-transform duration-500 ease-out rounded-t-[3rem] md:relative md:inset-y-0 md:right-0 md:h-full md:min-h-0 md:w-[300px] md:rounded-none md:shadow-none md:flex md:flex-row md:border-l md:border-border/10 md:z-0 md:translate-x-0 ${
             isMobile && (activeMobilePanel === "layouts" || activeMobilePanel === "text" || activeMobilePanel === "backgrounds") ? "translate-y-0" : isMobile ? "translate-y-full" : ""
           }`}
         >
           {/* Desktop Panel Icons - Hidden on Mobile */}
-          <div className="hidden flex-col items-center border-r border-border/50 bg-white py-8 gap-8 md:flex md:w-[48px]">
+          <div className="hidden flex-col items-center border-r border-border/10 bg-white py-8 gap-8 md:flex md:w-[48px]">
             {[
               { id: "text" as const, Icon: Type },
               { id: "layouts" as const, Icon: LayoutGrid },
@@ -1672,7 +1664,7 @@ export default function PhotoEditor({
           </div>
 
           <div className="relative flex flex-1 flex-col min-h-0 bg-white">
-            <div className="flex items-center justify-between border-b border-border/50 px-5 py-6 md:hidden">
+            <div className="flex items-center justify-between border-b border-border/10 px-5 py-4 md:hidden">
               <div className="text-[10px] font-black uppercase tracking-[0.2em] text-foreground/40">
                 {activeMobilePanel === "layouts" ? "Layouts" : "Editing"}
               </div>
@@ -1681,11 +1673,12 @@ export default function PhotoEditor({
               </button>
             </div>
 
-            <div className="flex-1 overflow-y-auto scrollbar-hide">
+            <div className="flex-1 overflow-hidden">
               {(activeMobilePanel === "layouts" || (activePanel === "layouts" && !isMobile)) ? (
-                <div className="h-full">
-                  <div className="hidden border-b border-border/50 px-6 py-6 text-[10px] font-black uppercase tracking-[0.2em] text-foreground/40 md:block">Choose Layout</div>
-                  <div className="grid grid-cols-2 gap-4 px-4 pb-12 pt-6 md:pt-0">
+                <div className="flex flex-col h-full">
+                  <div className="shrink-0 border-b border-border/10 px-6 py-4 text-[10px] font-black uppercase tracking-[0.2em] text-foreground/40 md:block">Choose Layout</div>
+                  <div className="flex-1 min-h-0 overflow-y-auto scrollbar-hide px-4 pb-8 pt-6">
+                    <div className="grid grid-cols-2 gap-4">
                     {LAYOUTS.filter((layout) => layout.id !== "front-cover-square").map((layout) => (
                       <button
                         key={layout.id}
@@ -1696,8 +1689,8 @@ export default function PhotoEditor({
                             if (window.innerWidth < 768) setActiveMobilePanel("none");
                           }
                         }}
-                        className={`relative overflow-hidden rounded-2xl border-2 transition-all p-2 ${
-                          activePage?.layoutId === layout.id ? "border-primary bg-primary/5 shadow-xl shadow-primary/5 scale-105" : "border-border/20 bg-white hover:border-primary/20"
+                        className={`relative overflow-hidden rounded-none border transition-all p-2 ${
+                          activePage?.layoutId === layout.id ? "border-primary bg-primary/5" : "border-border/15 bg-white hover:border-primary/30"
                         } ${activePage?.kind !== "page" ? "opacity-30 cursor-not-allowed" : ""}`}
                         style={{ aspectRatio: String(sizePreset.pageAspectRatio) }}
                       >
@@ -1707,83 +1700,88 @@ export default function PhotoEditor({
                         ) : null}
                       </button>
                     ))}
+                    </div>
                   </div>
                 </div>
               ) : null}
 
               {(activeMobilePanel === "text" || (activePanel === "text" && !isMobile)) ? (
-                <div className="h-full px-6 py-8 flex flex-col gap-10">
-                  <div className="text-[10px] font-black uppercase tracking-[0.2em] text-foreground/40">Typography & Content</div>
-                  {selectedTarget?.type === "caption" && activePage ? (
-                    <div className="flex flex-col gap-10">
-                      <div className="flex flex-col gap-4">
-                        <p className="text-[10px] font-black uppercase tracking-widest text-foreground/60">Alignment</p>
-                        <div className="grid grid-cols-3 gap-3">
-                          {(["left", "center", "right"] as TextAlign[]).map((align) => (
-                            <button
-                              key={align}
-                              type="button"
-                              onClick={() => setPageTextAlign(align)}
-                              className={`rounded-2xl py-4 text-[10px] font-black uppercase tracking-widest transition-all ${
-                                activePage.textAlign === align ? "bg-primary text-white shadow-xl shadow-primary/20" : "bg-secondary/20 text-foreground/40 hover:bg-secondary/40"
-                              }`}
-                            >
-                              {align}
-                            </button>
-                          ))}
-                        </div>
-                      </div>
-                      <div className="flex flex-col gap-4">
-                        <p className="text-[10px] font-black uppercase tracking-widest text-foreground/60">Style Preset</p>
-                        <div className="relative">
-                          <select
-                            value={activePage.font}
-                            onChange={(event) => setPageFont(event.target.value as FontOption)}
-                            className="w-full rounded-2xl bg-secondary/10 px-4 py-4 text-[10px] font-black uppercase tracking-widest text-primary focus:outline-none border-2 border-border/20 focus:border-primary transition-all appearance-none"
-                          >
-                            <option value="classic">Classic Serif</option>
-                            <option value="modern">Modern Sans</option>
-                            <option value="editorial">Editorial Look</option>
-                          </select>
-                          <div className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-primary">
-                            <ChevronDown className="h-4 w-4" />
+                <div className="flex flex-col h-full">
+                  <div className="shrink-0 border-b border-border/10 px-6 py-4 text-[10px] font-black uppercase tracking-[0.2em] text-foreground/40">Typography & Content</div>
+                  <div className="flex-1 overflow-y-auto scrollbar-hide p-6 flex flex-col gap-10">
+                    {selectedTarget?.type === "caption" && activePage ? (
+                      <div className="flex flex-col gap-10">
+                        <div className="flex flex-col gap-4">
+                          <p className="text-[10px] font-black uppercase tracking-widest text-foreground/60">Alignment</p>
+                          <div className="grid grid-cols-3 gap-3">
+                            {(["left", "center", "right"] as TextAlign[]).map((align) => (
+                              <button
+                                key={align}
+                                type="button"
+                                onClick={() => setPageTextAlign(align)}
+                                className={`rounded-2xl py-4 text-[10px] font-black uppercase tracking-widest transition-all ${
+                                  activePage.textAlign === align ? "bg-primary text-white shadow-xl shadow-primary/20" : "bg-secondary/20 text-foreground/40 hover:bg-secondary/40"
+                                }`}
+                              >
+                                {align}
+                              </button>
+                            ))}
                           </div>
                         </div>
+                        <div className="flex flex-col gap-4">
+                          <p className="text-[10px] font-black uppercase tracking-widest text-foreground/60">Style Preset</p>
+                          <div className="relative">
+                            <select
+                              value={activePage.font}
+                              onChange={(event) => setPageFont(event.target.value as FontOption)}
+                              className="w-full rounded-2xl bg-secondary/10 px-4 py-4 text-[10px] font-black uppercase tracking-widest text-primary focus:outline-none border-2 border-border/20 focus:border-primary transition-all appearance-none"
+                            >
+                              <option value="classic">Classic Serif</option>
+                              <option value="modern">Modern Sans</option>
+                              <option value="editorial">Editorial Look</option>
+                            </select>
+                            <div className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-primary">
+                              <ChevronDown className="h-4 w-4" />
+                            </div>
+                          </div>
+                        </div>
+                        <div className="flex flex-col gap-4">
+                          <p className="text-[10px] font-black uppercase tracking-widest text-foreground/60">Caption</p>
+                          <textarea
+                            value={selectedSlot?.caption ?? ""}
+                            onChange={(event) => updateCaptionText(event.target.value)}
+                            rows={6}
+                            placeholder="Type your memory here..."
+                            className="w-full rounded-3xl bg-secondary/10 px-5 py-5 text-[11px] font-medium leading-relaxed text-foreground placeholder:text-foreground/20 focus:outline-none border-2 border-border/20 focus:border-primary transition-all scrollbar-hide resize-none"
+                          />
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => setActiveMobilePanel("none")}
+                          className="mt-4 h-14 rounded-full bg-primary-pressed text-[10px] font-black uppercase tracking-widest text-white shadow-xl shadow-primary-pressed/20 md:hidden"
+                        >
+                          Done Editing
+                        </button>
                       </div>
-                      <div className="flex flex-col gap-4">
-                        <p className="text-[10px] font-black uppercase tracking-widest text-foreground/60">Caption</p>
-                        <textarea
-                          value={selectedSlot?.caption ?? ""}
-                          onChange={(event) => updateCaptionText(event.target.value)}
-                          rows={6}
-                          placeholder="Type your memory here..."
-                          className="w-full rounded-3xl bg-secondary/10 px-5 py-5 text-[11px] font-medium leading-relaxed text-foreground placeholder:text-foreground/20 focus:outline-none border-2 border-border/20 focus:border-primary transition-all scrollbar-hide resize-none"
-                        />
+                    ) : (
+                      <div className="mt-12 text-[11px] font-bold uppercase tracking-[0.2em] leading-relaxed text-foreground/20 text-center px-4">
+                         Select a text area on your page to edit captions or change styles
                       </div>
-                      <button
-                        type="button"
-                        onClick={() => setActiveMobilePanel("none")}
-                        className="mt-4 h-14 rounded-full bg-primary-pressed text-[10px] font-black uppercase tracking-widest text-white shadow-xl shadow-primary-pressed/20 md:hidden"
-                      >
-                        Done Editing
-                      </button>
-                    </div>
-                  ) : (
-                    <div className="mt-12 text-[11px] font-bold uppercase tracking-[0.2em] leading-relaxed text-foreground/20 text-center px-4">
-                       Select a text area on your page to edit captions or change styles
-                    </div>
-                  )}
+                    )}
+                  </div>
                 </div>
               ) : null}
 
               {activePanel === "backgrounds" ? (
-                <div className="h-full px-6 py-6 flex flex-col gap-8">
-                  <div className="text-[10px] font-black uppercase tracking-[0.2em] text-foreground/40">Backgrounds</div>
-                  <div className="mt-20 flex flex-col items-center justify-center gap-6 text-center opacity-20">
-                     <div className="h-20 w-20 rounded-full bg-secondary/30 flex items-center justify-center">
-                        <Palette className="h-8 w-8" />
-                     </div>
-                     <p className="text-[10px] font-black uppercase tracking-widest leading-loose">No alternative themes available for this edition</p>
+                <div className="flex flex-col h-full">
+                  <div className="shrink-0 border-b border-border/10 px-6 py-4 text-[10px] font-black uppercase tracking-[0.2em] text-foreground/40">Backgrounds</div>
+                  <div className="flex-1 overflow-y-auto scrollbar-hide p-6">
+                    <div className="mt-20 flex flex-col items-center justify-center gap-6 text-center opacity-20">
+                       <div className="h-20 w-20 rounded-full bg-secondary/30 flex items-center justify-center">
+                          <Palette className="h-8 w-8" />
+                       </div>
+                       <p className="text-[10px] font-black uppercase tracking-widest leading-loose">No alternative themes available for this edition</p>
+                    </div>
                   </div>
                 </div>
               ) : null}
@@ -1791,7 +1789,7 @@ export default function PhotoEditor({
           </div>
         </aside>
 
-        <nav className="z-[60] flex h-[72px] shrink-0 items-center justify-around border-t border-border/50 bg-white px-6 pb-safe md:hidden">
+        <nav className="z-[60] flex h-[72px] shrink-0 items-center justify-around border-t border-border/10 bg-white px-6 pb-safe md:hidden">
           {[
             { id: "library", label: "Photos", Icon: ImageIcon },
             { id: "layouts", label: "Layouts", Icon: LayoutGrid },

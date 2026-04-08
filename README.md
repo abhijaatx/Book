@@ -45,6 +45,11 @@ DATABASE_URL="postgresql://user:password@localhost:5432/kahaani_books"
 
 RAZORPAY_KEY_ID="rzp_test_..."
 RAZORPAY_KEY_SECRET="..."
+
+GOOGLE_CLIENT_ID="your-google-client-id"
+GOOGLE_CLIENT_SECRET="your-google-client-secret"
+NEXTAUTH_URL="http://localhost:3000"
+NEXTAUTH_SECRET="replace-with-a-long-random-secret"
 ```
 
 ### 4. Run Development Server

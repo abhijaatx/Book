@@ -8,6 +8,8 @@ export default function Footer() {
       { name: "Planners", href: "/category/planners" },
       { name: "Notebooks", href: "/category/notebooks" },
       { name: "Photobooks", href: "/category/photobooks" },
+      { name: "Stationery", href: "/category/stationery" },
+      { name: "Newspaper", href: "/category/newspapers" },
       { name: "Sale", href: "/category/sale" },
     ]},
     { title: "ABOUT", links: [

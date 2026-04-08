@@ -1,189 +1,161 @@
-"use client";
+"use client"
 
 import { useState } from "react";
-import { ShoppingBag, ChevronRight, User, MapPin, Phone, Mail, Clock, CheckCircle, Package, Truck } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { 
+  ShoppingBag, 
+  Search, 
+  Filter, 
+  MoreHorizontal, 
+  ExternalLink, 
+  Clock, 
+  CheckCircle2, 
+  Truck, 
+  PackageCheck,
+  ChevronDown
+} from "lucide-react";
+import { fadeInUp, staggerContainer } from "@/lib/animations";
 
-export default function AdminOrdersPage() {
-  const [selectedOrder, setSelectedOrder] = useState<any>(null);
-
-  // Mock data for demo
+export default function AdminOrders() {
+  const [filter, setFilter] = useState("all");
+  
   const orders = [
-    {
-      id: "ord_123",
-      createdAt: "2026-04-06T10:00:00Z",
-      customerName: "Abhijaat Krishna",
-      customerEmail: "abhijaat@example.com",
-      customerPhone: "91234 56789",
-      shippingAddress: "E-12, Green Park, New Delhi",
-      pincode: "110016",
-      totalAmount: 2499,
-      paymentStatus: "paid",
-      shippingStatus: "confirmed",
-      items: [
-        {
-          name: "The 'Our Story' Anniversary Book",
-          price: 2499,
-          personalization: {
-            recipientName: "Neha",
-            senderName: "Abhijaat",
-            message: "To my forever love, 5 years and counting!",
-            photos: ["photo1.jpg", "photo2.jpg"]
-          }
-        }
-      ]
-    },
-    {
-      id: "ord_124",
-      createdAt: "2026-04-06T11:30:00Z",
-      customerName: "Priya Sharma",
-      customerEmail: "priya@example.com",
-      customerPhone: "98765 43210",
-      shippingAddress: "Bungalow 4, Juhu Tara Road, Mumbai",
-      pincode: "400049",
-      totalAmount: 4999,
-      paymentStatus: "paid",
-      shippingStatus: "production",
-      items: [
-        {
-          name: "Forever Together Premium Photo Album",
-          price: 4999,
-          personalization: {
-            recipientName: "Mom & Dad",
-            senderName: "Priya",
-            message: "Happy 25th Anniversary!",
-            photos: ["wedding.jpg", "vacation.jpg"]
-          }
-        }
-      ]
-    }
+    { id: "ORD-9281", customer: "Abhijaat X", email: "abhijaat@example.com", product: "The 'Our Story' Anniversary Book", amount: "₹2,499", status: "processing", date: "April 08, 2026", items: 1 },
+    { id: "ORD-9280", customer: "Sarah Miller", email: "sarah@miller.com", product: "In Full Bloom Album", amount: "₹4,200", status: "shipped", date: "April 07, 2026", items: 2 },
+    { id: "ORD-9279", customer: "Michael Chen", email: "m.chen@outlook.com", product: "Celestial Dreams Magazine", amount: "₹1,899", status: "pending", date: "April 07, 2026", items: 1 },
+    { id: "ORD-9278", customer: "Emma Wilson", email: "emma.w@gmail.com", product: "Magical Planners Pack", amount: "₹999", status: "delivered", date: "April 06, 2026", items: 3 },
+    { id: "ORD-9277", customer: "David Brown", email: "dbrown4@yahoo.com", product: "Classic OG Notebook", amount: "₹499", status: "processing", date: "April 06, 2026", items: 1 },
+    { id: "ORD-9276", customer: "Lisa Park", email: "lisa.park@karea.net", product: "Everything Magic Journal", amount: "₹1,499", status: "shipped", date: "April 05, 2026", items: 2 },
   ];
 
+  const filteredOrders = filter === "all" ? orders : orders.filter(o => o.status === filter);
+
+  const getStatusColor = (status: string) => {
+     switch(status) {
+        case "pending": return "text-amber-500 bg-amber-500/10 border-amber-500/20";
+        case "processing": return "text-blue-500 bg-blue-500/10 border-blue-500/20";
+        case "shipped": return "text-purple-500 bg-purple-500/10 border-purple-500/20";
+        case "delivered": return "text-emerald-500 bg-emerald-500/10 border-emerald-500/20";
+        default: return "text-slate-500 bg-slate-500/10 border-slate-500/20";
+     }
+  };
+
+  const getStatusIcon = (status: string) => {
+     switch(status) {
+        case "pending": return <Clock size={12} />;
+        case "processing": return <CheckCircle2 size={12} />;
+        case "shipped": return <Truck size={12} />;
+        case "delivered": return <PackageCheck size={12} />;
+        default: return null;
+     }
+  };
+
   return (
-    <div className="min-h-screen bg-muted/20 p-8">
-      <div className="mx-auto max-w-7xl flex flex-col gap-8">
-        <div className="flex items-center justify-between">
-          <div className="flex flex-col gap-1">
-             <h1 className="font-serif text-3xl font-bold text-primary">Order Management</h1>
-             <p className="text-sm text-muted-foreground uppercase tracking-widest font-bold">Kahaani Books Admin</p>
-          </div>
-          <div className="flex items-center gap-4">
-             <div className="h-10 w-10 rounded-full bg-secondary text-white flex items-center justify-center font-bold">A</div>
-             <span className="text-sm font-bold text-primary">Admin Access</span>
-          </div>
-        </div>
-
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-10 items-start">
-          
-          {/* Order List */}
-          <div className="lg:col-span-1 flex flex-col gap-4">
-            <h3 className="text-xs font-bold text-primary uppercase tracking-widest pl-2">Recent Orders</h3>
-            {orders.map((order) => (
-              <div 
-                key={order.id}
-                onClick={() => setSelectedOrder(order)}
-                className={`p-6 rounded-2xl cursor-pointer border-2 transition-all flex justify-between items-center ${selectedOrder?.id === order.id ? "bg-white border-secondary shadow-lg" : "bg-white/50 border-white hover:border-secondary/20"}`}
-              >
-                <div className="flex flex-col gap-1">
-                   <span className="text-xs font-bold text-muted-foreground">{order.id}</span>
-                   <span className="font-bold text-primary">{order.customerName}</span>
-                   <span className="text-[10px] uppercase font-bold text-secondary">₹{order.totalAmount} • {order.paymentStatus}</span>
-                </div>
-                <ChevronRight className={`h-5 w-5 transition-transform ${selectedOrder?.id === order.id ? "rotate-90 text-secondary" : "text-muted-foreground"}`} />
-              </div>
-            ))}
-          </div>
-
-          {/* Order Detail View */}
-          <div className="lg:col-span-2">
-            {selectedOrder ? (
-              <div className="bg-white rounded-3xl p-10 shadow-2xl shadow-primary/5 flex flex-col gap-10">
-                <div className="flex justify-between items-start pb-6 border-b">
-                   <div className="flex flex-col gap-2">
-                      <h2 className="font-serif text-3xl font-bold text-primary">{selectedOrder.customerName}</h2>
-                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                         <Clock className="h-4 w-4" /> <span>Order date: {new Date(selectedOrder.createdAt).toLocaleString()}</span>
-                      </div>
-                   </div>
-                   <div className="bg-green-100 text-green-700 px-4 py-2 rounded-full text-xs font-bold uppercase"> Paid via Razorpay </div>
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-10">
-                   {/* Shipping */}
-                   <div className="flex flex-col gap-6">
-                      <h4 className="text-xs font-bold text-primary uppercase tracking-widest border-l-4 border-secondary pl-3">Shipping Info</h4>
-                      <div className="flex flex-col gap-3 text-sm font-medium">
-                         <div className="flex items-center gap-3"><MapPin className="h-4 w-4 text-secondary" /> {selectedOrder.shippingAddress}</div>
-                         <div className="flex items-center gap-3"><Phone className="h-4 w-4 text-secondary" /> {selectedOrder.customerPhone}</div>
-                         <div className="flex items-center gap-3"><Mail className="h-4 w-4 text-secondary" /> {selectedOrder.customerEmail}</div>
-                         <div className="flex items-center gap-3 font-bold text-primary"><Package className="h-4 w-4 text-secondary" /> Pincode: {selectedOrder.pincode}</div>
-                      </div>
-                   </div>
-
-                   {/* Status Control */}
-                   <div className="flex flex-col gap-6">
-                      <h4 className="text-xs font-bold text-primary uppercase tracking-widest border-l-4 border-secondary pl-3">Order Progress</h4>
-                      <div className="flex flex-col gap-3">
-                         {[
-                           { name: "Confirmed", icon: CheckCircle, active: true },
-                           { name: "In Production", icon: Package, active: selectedOrder.shippingStatus === "production" },
-                           { name: "Shipped", icon: Truck, active: false }
-                         ].map(state => (
-                           <button 
-                             key={state.name}
-                             className={`flex items-center gap-3 p-3 rounded-xl border-2 transition-all font-bold text-xs uppercase ${state.active ? "bg-primary text-white border-primary" : "border-muted text-muted-foreground hover:border-secondary"}`}
-                           >
-                             <state.icon className="h-4 w-4" /> {state.name}
-                           </button>
-                         ))}
-                      </div>
-                   </div>
-                </div>
-
-                {/* Personalization Section */}
-                <div className="flex flex-col gap-6 pt-10 border-t">
-                    <h4 className="text-xs font-bold text-primary uppercase tracking-widest border-l-4 border-secondary pl-3">Personalization Artifacts</h4>
-                    {selectedOrder.items.map((item: any, i: number) => (
-                      <div key={i} className="bg-muted/30 rounded-2xl p-6 flex flex-col gap-6">
-                         <h5 className="font-serif text-xl font-bold text-primary">{item.name}</h5>
-                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 text-sm">
-                            <div className="flex flex-col gap-1">
-                               <span className="text-xs font-bold text-muted-foreground uppercase">Recipient</span>
-                               <span className="font-bold">{item.personalization.recipientName}</span>
-                            </div>
-                            <div className="flex flex-col gap-1">
-                               <span className="text-xs font-bold text-muted-foreground uppercase">Sender</span>
-                               <span className="font-bold">{item.personalization.senderName}</span>
-                            </div>
-                            <div className="sm:col-span-2 flex flex-col gap-1">
-                               <span className="text-xs font-bold text-muted-foreground uppercase">Custom Message</span>
-                               <p className="italic bg-white p-4 rounded-xl border border-secondary/20 font-medium">"{item.personalization.message}"</p>
-                            </div>
-                            <div className="sm:col-span-2 flex flex-col gap-3">
-                               <span className="text-xs font-bold text-muted-foreground uppercase">Uploaded Photos (Source)</span>
-                               <div className="flex gap-4">
-                                  {item.personalization.photos.map((p: string) => (
-                                    <div key={p} className="h-20 w-20 rounded-xl bg-primary/10 flex flex-col items-center justify-center border-2 border-dashed border-primary/20 text-[10px] font-bold text-primary">
-                                       <span>SRC</span>
-                                       <span>IMG</span>
-                                    </div>
-                                  ))}
-                               </div>
-                               <button className="self-start text-[10px] font-bold text-secondary underline tracking-widest uppercase">Download All Assets (.zip)</button>
-                            </div>
-                         </div>
-                      </div>
-                    ))}
-                </div>
-              </div>
-            ) : (
-              <div className="h-full min-h-[600px] rounded-3xl border-2 border-dashed border-muted flex flex-col items-center justify-center gap-4 text-muted-foreground">
-                 <ShoppingBag className="h-20 w-20 opacity-10" />
-                 <p className="font-medium">Select an order from the list to view details.</p>
-              </div>
-            )}
-          </div>
-        </div>
+    <motion.div 
+      variants={staggerContainer}
+      initial="initial"
+      animate="animate"
+      className="flex flex-col gap-12"
+    >
+      <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-8">
+         <div className="flex flex-col gap-4">
+            <h1 className="font-serif text-[48px] tracking-tight text-foreground lowercase italic">Magic <span className="text-secondary/60 not-italic font-sans font-black uppercase text-[24px] tracking-[0.2em] ml-4">Registry</span></h1>
+            <p className="text-foreground/50 text-[15px] font-medium max-w-lg leading-relaxed">Oversee every personalized keepsake as it moves from the studio to its new home.</p>
+         </div>
+         
+         <div className="flex items-center gap-3">
+            <div className="bg-white border border-foreground/5 rounded-2xl flex p-1 shadow-sm">
+               {["all", "pending", "processing", "shipped", "delivered"].map((f) => (
+                 <button 
+                   key={f}
+                   onClick={() => setFilter(f)}
+                   className={`px-5 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${filter === f ? "bg-primary text-white shadow-lg shadow-primary/20" : "text-foreground/40 hover:text-primary hover:bg-primary/5"}`}
+                 >
+                   {f}
+                 </button>
+               ))}
+            </div>
+         </div>
       </div>
-    </div>
+
+      {/* Orders Table Container */}
+      <motion.div variants={fadeInUp} className="rounded-[3rem] bg-white border border-foreground/5 overflow-hidden flex flex-col shadow-sm shadow-primary/5">
+         <div className="overflow-x-auto">
+            <table className="w-full text-left border-collapse">
+               <thead>
+                  <tr className="border-b border-foreground/5">
+                     <th className="px-10 py-8 text-[10px] font-black uppercase tracking-[0.4em] text-foreground/40">Order ID</th>
+                     <th className="px-10 py-8 text-[10px] font-black uppercase tracking-[0.4em] text-foreground/40">Curator</th>
+                     <th className="px-10 py-8 text-[10px] font-black uppercase tracking-[0.4em] text-foreground/40">Edition</th>
+                     <th className="px-10 py-8 text-[10px] font-black uppercase tracking-[0.4em] text-foreground/40">Status</th>
+                     <th className="px-10 py-8 text-[10px] font-black uppercase tracking-[0.4em] text-foreground/40">Story Date</th>
+                     <th className="px-10 py-8 text-[10px] font-black uppercase tracking-[0.4em] text-foreground/40 text-right">Value</th>
+                     <th className="px-10 py-8"></th>
+                  </tr>
+               </thead>
+               <tbody className="divide-y divide-foreground/5 font-medium leading-normal text-foreground">
+                  <AnimatePresence mode="popLayout">
+                    {filteredOrders.map((order) => (
+                      <motion.tr 
+                        key={order.id}
+                        layout
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className="group hover:bg-primary/[0.02] transition-colors"
+                      >
+                         <td className="px-10 py-8">
+                            <span className="text-[13px] font-black text-primary transition-colors cursor-pointer">{order.id}</span>
+                         </td>
+                         <td className="px-10 py-8">
+                            <div className="flex flex-col gap-1">
+                               <span className="text-[14px] font-medium text-foreground">{order.customer}</span>
+                               <span className="text-[11px] text-foreground/40 font-medium">{order.email}</span>
+                            </div>
+                         </td>
+                         <td className="px-10 py-8">
+                            <div className="flex flex-col gap-1 max-w-[200px]">
+                               <span className="text-[13px] text-foreground line-clamp-1">{order.product}</span>
+                               <span className="text-[11px] text-foreground/40 uppercase font-black tracking-widest">{order.items} {order.items === 1 ? 'Item' : 'Items'}</span>
+                            </div>
+                         </td>
+                         <td className="px-10 py-8">
+                            <div className={`inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full border text-[10px] font-black uppercase tracking-widest ${getStatusColor(order.status)}`}>
+                               {getStatusIcon(order.status)}
+                               {order.status}
+                            </div>
+                         </td>
+                         <td className="px-10 py-8">
+                            <span className="text-[13px] font-serif italic text-foreground/40">{order.date}</span>
+                         </td>
+                         <td className="px-10 py-8 text-right">
+                            <span className="text-[15px] font-black text-foreground tracking-tight">{order.amount}</span>
+                         </td>
+                         <td className="px-10 py-8 text-right">
+                            <div className="flex items-center justify-end gap-3 opacity-0 group-hover:opacity-100 transition-opacity">
+                               <button className="h-9 w-9 rounded-xl border border-foreground/10 flex items-center justify-center text-foreground/40 hover:text-primary hover:bg-primary/5 transition-all" title="View Design">
+                                  <ExternalLink size={16} />
+                               </button>
+                               <button className="h-9 w-9 rounded-xl border border-foreground/10 flex items-center justify-center text-foreground/40 hover:text-primary hover:bg-primary/5 transition-all">
+                                  <MoreHorizontal size={16} />
+                               </button>
+                            </div>
+                         </td>
+                      </motion.tr>
+                    ))}
+                  </AnimatePresence>
+               </tbody>
+            </table>
+         </div>
+         
+         <div className="px-10 py-8 bg-background border-t border-foreground/5 flex items-center justify-between">
+            <span className="text-[11px] font-black uppercase tracking-widest text-foreground/40">Showing {filteredOrders.length} of {orders.length} Magic Registers</span>
+            <div className="flex items-center gap-4">
+               <button className="text-[11px] font-black uppercase tracking-widest text-foreground/40 hover:text-primary cursor-pointer transition-colors px-6 py-2 border border-foreground/5 rounded-full">Archive History</button>
+               <button className="text-[11px] font-black uppercase tracking-widest text-primary border border-primary/20 bg-primary/5 rounded-full px-8 py-3 hover:bg-primary transition-all hover:text-white shadow-lg shadow-primary/10">Export Registry</button>
+            </div>
+         </div>
+      </motion.div>
+    </motion.div>
   );
 }

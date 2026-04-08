@@ -12,8 +12,8 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="min-h-screen flex flex-col">
-      <AnnouncementBar />
-      <Navbar />
+      {!hideFooter ? <AnnouncementBar /> : null}
+      {!hideFooter ? <Navbar /> : null}
       <main className={mainClassName}>{children}</main>
       {!hideFooter ? <Footer /> : null}
     </div>

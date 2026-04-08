@@ -34,18 +34,14 @@ export default function PersonalizationWizard({
   // Dynamic steps based on product type
   const steps = product.type === 'album' 
     ? [
-        { id: 1, title: "Material", subtitle: "Choose your premium finish." },
-        { id: 2, title: "Our Names", subtitle: "Who is this album for?" },
-        { id: 3, title: "Your Photos", subtitle: "Upload high-res moments." },
-        { id: 4, title: "Page Count", subtitle: "How many memories to tell?" },
-        { id: 5, title: "Review", subtitle: "Ready for production?" }
+        { id: 1, title: "Photos", subtitle: "Upload high-res moments." },
+        { id: 2, title: "Page Count", subtitle: "How many memories to tell?" },
+        { id: 3, title: "Review", subtitle: "Ready for production?" }
       ]
     : [
-        { id: 1, title: "Occasion", subtitle: "Tell us about the big day." },
-        { id: 2, title: "Names", subtitle: "Who is this story about?" },
-        { id: 3, title: "Photos", subtitle: "Upload your favorite moments." },
-        { id: 4, title: "Notes", subtitle: "Add dates & messages." },
-        { id: 5, title: "Review", subtitle: "Ready to make it forever?" }
+        { id: 1, title: "Photos", subtitle: "Upload your favorite moments." },
+        { id: 2, title: "Notes", subtitle: "Add dates & messages." },
+        { id: 3, title: "Review", subtitle: "Ready to make it forever?" }
       ];
 
   const router = useRouter();
@@ -110,9 +106,9 @@ export default function PersonalizationWizard({
     }));
   }, []);
 
-  if (currentStep === 3) {
+  if (currentStep === 1) {
     return (
-      <div className="flex h-full min-h-0 flex-col overflow-hidden bg-[#f3f1ee]">
+      <div className="flex h-screen min-h-0 flex-col overflow-hidden bg-[#f3f1ee]">
         <PhotoEditor
           initialPhotos={formData.photos}
           projectName={product.type === "album" ? selectedSizePreset.label : `${selectedSizePreset.label}`}
@@ -150,10 +146,10 @@ export default function PersonalizationWizard({
           <AnimatePresence mode="wait">
             <motion.div
               key={currentStep}
-              initial={{ opacity: 0, x: 20 }}
+              initial={{ opacity: 0, x: 10 }}
               animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -20 }}
-              transition={{ duration: 0.3 }}
+              exit={{ opacity: 0, x: -10 }}
+              transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
               className="flex flex-grow flex-col gap-10"
             >
               <div className="flex flex-col gap-2">
@@ -161,61 +157,10 @@ export default function PersonalizationWizard({
                 <p className="text-muted-foreground">{steps[currentStep-1].subtitle}</p>
               </div>
 
-              {/* Step 1: Occasion (Book) or Material (Album) */}
-              {currentStep === 1 && (
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  {product.type === 'album' ? (
-                    product.variants.find(v => v.name === "Material")?.options.map(mat => (
-                      <button
-                        key={mat}
-                        onClick={() => { updateFormData("material", mat); nextStep(); }}
-                        className={`h-20 rounded-2xl border-2 flex items-center justify-center font-bold transition-all text-lg ${formData.material === mat ? "border-primary bg-primary text-white shadow-xl shadow-primary/20 scale-105" : "border-muted text-muted-foreground hover:border-secondary hover:text-secondary"}`}
-                      >
-                        {mat}
-                      </button>
-                    ))
-                  ) : (
-                    ["Anniversary", "Birthday", "Proposal", "Wedding"].map(occ => (
-                      <button
-                        key={occ}
-                        onClick={() => { updateFormData("occasion", occ); nextStep(); }}
-                        className={`h-20 rounded-2xl border-2 flex items-center justify-center font-bold transition-all text-lg ${formData.occasion === occ ? "border-primary bg-primary text-white shadow-xl shadow-primary/20 scale-105" : "border-muted text-muted-foreground hover:border-secondary hover:text-secondary"}`}
-                      >
-                        {occ}
-                      </button>
-                    ))
-                  )}
-                </div>
-              )}
 
-              {/* Step 2: Names */}
+
+              {/* Step 2: Story/Message (Book) or Page Count (Album) */}
               {currentStep === 2 && (
-                <div className="flex flex-col gap-8">
-                  <div className="flex flex-col gap-4">
-                    <label className="text-sm font-bold text-primary uppercase tracking-widest">Recipient's Name (e.g. My Husband)</label>
-                    <input 
-                      type="text" 
-                      placeholder="Enter name..."
-                      value={formData.recipientName}
-                      onChange={(e) => updateFormData("recipientName", e.target.value)}
-                      className="h-16 w-full rounded-xl border-2 border-muted px-6 text-lg font-medium focus:border-secondary transition-all outline-none"
-                    />
-                  </div>
-                  <div className="flex flex-col gap-4">
-                    <label className="text-sm font-bold text-primary uppercase tracking-widest">Your Name (Sender)</label>
-                    <input 
-                      type="text" 
-                      placeholder="Your name..."
-                      value={formData.senderName}
-                      onChange={(e) => updateFormData("senderName", e.target.value)}
-                      className="h-16 w-full rounded-xl border-2 border-muted px-6 text-lg font-medium focus:border-secondary transition-all outline-none"
-                    />
-                  </div>
-                </div>
-              )}
-
-              {/* Step 4: Story/Message (Book) or Page Count (Album) */}
-              {currentStep === 4 && (
                 <div className="flex flex-col gap-6">
                   {product.type === 'album' ? (
                     <div className="flex flex-col gap-4">
@@ -256,8 +201,8 @@ export default function PersonalizationWizard({
                 </div>
               )}
 
-              {/* Step 5: Review */}
-              {currentStep === 5 && (
+              {/* Step 3: Review */}
+              {currentStep === 3 && (
                 <div className="flex flex-col gap-8">
                   <div className="rounded-2xl bg-muted/50 p-6 flex flex-col gap-4 border border-secondary/20">
                      <div className="flex justify-between items-center pb-4 border-b border-muted">
@@ -307,7 +252,7 @@ export default function PersonalizationWizard({
               Back
             </button>
             
-            {currentStep < 5 ? (
+            {currentStep < 3 ? (
               <button
                 onClick={nextStep}
                 className="flex h-14 items-center gap-3 rounded-xl bg-primary px-10 text-white font-bold shadow-xl shadow-primary/20 transition-all hover:bg-primary/90"

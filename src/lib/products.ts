@@ -28,6 +28,10 @@ export interface Product {
   description: string;
   longDescription: string;
   basePrice: number;
+  salePrice?: number;
+  isNew?: boolean;
+  size?: string;
+  material?: string;
   images: string[];
   previewImagesBySize: Record<SizePresetId, string[]>;
   sizePresets: SizePreset[];
@@ -106,11 +110,12 @@ const collections: CollectionSeed[] = [
 ];
 
 const albumVariants: ProductVariant[] = [
-  { name: "Format", options: ["Hardcover", "Softcover (-₹400)", "Premium Linen (+₹800)"] },
+  { name: "Material", options: ["Hardcover", "Softcover (-₹400)", "Premium Linen (+₹800)"] },
   { name: "Paper Type", options: ["Matte Finish", "Lustre (+₹200)", "Recycled Eco (+₹150)"] },
 ];
 
 const bookVariants: ProductVariant[] = [
+  { name: "Material", options: ["Softcover", "Hardcover (+₹300)", "Premium Linen (+₹700)"] },
   { name: "Ruling", options: ["Ruled", "Dotted", "Plain", "Grid"] },
 ];
 
@@ -177,6 +182,10 @@ const REAL_IMAGES: Record<string, string[]> = {
   stationery: [
     "https://oddgiraffe.com/cdn/shop/files/347-NB_1.webp?v=1753570428&width=1109",
     "https://oddgiraffe.com/cdn/shop/files/pnb-26_27b8f0cf-ca41-45a2-993c-92e6e42f1eec.webp?v=1763842598&width=1109"
+  ],
+  newspapers: [
+     "/Users/abhijaat/.gemini/antigravity/brain/a4438eb4-7193-4d06-945b-2dec5d32740e/newspaper_mockup_1_1775595606277.png",
+     "/Users/abhijaat/.gemini/antigravity/brain/a4438eb4-7193-4d06-945b-2dec5d32740e/newspaper_mockup_2_1775595625743.png"
   ]
 };
 

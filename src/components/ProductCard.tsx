@@ -1,5 +1,11 @@
+"use client";
+
 import Image from "next/image";
 import Link from "next/link";
+import { motion } from "framer-motion";
+import { Heart } from "lucide-react";
+import { useWishlist } from "@/store/useWishlist";
+import { heartPop } from "@/lib/animations";
 import {
   getDefaultSizePreset,
   getProductImagesForSize,
@@ -16,8 +22,13 @@ export default function ProductCard({ product }: ProductCardProps) {
   const productImage = getProductImagesForSize(product, defaultSizePreset.id)[0] ?? product.images[0];
   const displayPrice = getProductPrice(product, defaultSizePreset.id);
 
+  const { isInWishlist, toggleItem } = useWishlist();
+  const isLiked = isInWishlist(product.id);
+
   return (
-    <div className="group relative flex flex-col items-center gap-6 rounded-[2rem] bg-white p-4 shadow-sm transition-all duration-500 hover:shadow-xl hover:shadow-primary/5">
+    <div 
+      className="group relative flex flex-col items-center gap-6 rounded-[2rem] bg-white p-4 shadow-sm transition-all duration-500 hover:shadow-xl hover:shadow-primary/5"
+    >
       <div className="relative aspect-[0.76] w-full overflow-hidden rounded-[1.5rem] bg-[#f9f9f9] transition-transform duration-500 group-hover:scale-[1.02]">
         <Image
           src={productImage}
@@ -31,6 +42,28 @@ export default function ProductCard({ product }: ProductCardProps) {
         <div className="absolute left-4 top-4 rounded-full bg-white/90 px-3 py-1 text-[9px] font-black uppercase tracking-wider text-primary backdrop-blur-sm">
           {product.category.name}
         </div>
+        
+        {/* Wishlist Button */}
+        <motion.button
+          variants={heartPop}
+          initial="initial"
+          whileHover="hover"
+          whileTap="tap"
+          onClick={(e) => {
+            e.preventDefault();
+            toggleItem({
+              id: product.id,
+              name: product.name,
+              slug: product.slug,
+              price: displayPrice,
+              image: productImage,
+              category: product.category.name
+            });
+          }}
+          className={`absolute right-4 top-4 z-10 flex h-10 w-10 items-center justify-center rounded-full bg-white/90 backdrop-blur-sm shadow-sm transition-all ${isLiked ? 'text-rose-600 border-rose-600/20' : 'text-foreground/40 hover:text-rose-600 border-foreground/5'}`}
+        >
+          <Heart size={18} fill={isLiked ? "currentColor" : "none"} strokeWidth={isLiked ? 0 : 1.5} />
+        </motion.button>
       </div>
 
       <div className="flex w-full flex-col items-center gap-4 px-2 pb-2">
